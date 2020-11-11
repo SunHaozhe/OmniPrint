@@ -3,6 +3,7 @@ Utility functions
 """
 
 import os
+import glob
 
 
 def load_dict(lang):
@@ -24,17 +25,11 @@ def load_fonts(lang):
     """Load all fonts in the fonts directories
     """
 
+    fonts = []  
     if lang in os.listdir(os.path.join(os.path.dirname(__file__), "fonts")):
-        return [
-            os.path.join(os.path.dirname(__file__), "fonts/{}".format(lang), font)
-            for font in os.listdir(
-                os.path.join(os.path.dirname(__file__), "fonts/{}".format(lang))
-            )
-        ]
+        lang_directory = "{}".format(lang) 
     else:
-        return [
-            os.path.join(os.path.dirname(__file__), "fonts/latin", font)
-            for font in os.listdir(
-                os.path.join(os.path.dirname(__file__), "fonts/latin")
-            )
-        ]
+        lang_directory = "latin"
+    for p in glob.glob(os.path.join(os.path.dirname(__file__), "fonts", lang_directory, "*.ttf")): 
+        fonts.append(p)
+    return fonts 

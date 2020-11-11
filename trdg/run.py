@@ -1,6 +1,7 @@
 import argparse
 import os, errno
 import sys
+import glob
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -363,11 +364,9 @@ def main():
 
     # Create font (path) list
     if args.font_dir:
-        fonts = [
-            os.path.join(args.font_dir, p)
-            for p in os.listdir(args.font_dir)
-            if os.path.splitext(p)[1] == ".ttf"
-        ]
+        fonts = []
+        for p in glob.glob(os.path.join(args.font_dir, "*.ttf")):
+            fonts.append(p) 
     elif args.font:
         if os.path.isfile(args.font):
             fonts = [args.font]
