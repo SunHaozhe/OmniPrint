@@ -285,6 +285,13 @@ def parse_arguments():
         help="Define a font directory to be used",
     )
     parser.add_argument(
+        "-fidx",
+        "--font_index",
+        type=str,
+        nargs="?",
+        help="Define the font index (base name) to be used, font index should be a txt file in the trdg/fonts/index directory",
+    )
+    parser.add_argument(
         "-id",
         "--image_dir",
         type=str,
@@ -362,8 +369,11 @@ def main():
     else:
         lang_dict = load_dict(args.language)
 
-    # Create font (path) list
-    if args.font_dir:
+    # Creating font (path) list
+    if args.font_index:
+        with open(os.path.join("fonts", "index", args.font_index), "r") as f:
+            fonts = [os.path.join("fonts", p) for p in f.read().split("\n")] 
+    elif args.font_dir:
         fonts = []
         for p in glob.glob(os.path.join(args.font_dir, "*.ttf")):
             fonts.append(p) 

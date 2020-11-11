@@ -24,12 +24,13 @@ def load_dict(lang):
 def load_fonts(lang):
     """Load all fonts in the fonts directories
     """
-
-    fonts = []  
-    if lang in os.listdir(os.path.join(os.path.dirname(__file__), "fonts")):
-        lang_directory = "{}".format(lang) 
-    else:
-        lang_directory = "latin"
-    for p in glob.glob(os.path.join(os.path.dirname(__file__), "fonts", lang_directory, "*.ttf")): 
-        fonts.append(p)
+    
+    font_index = "latin.txt"
+    for p in glob.glob(os.path.join(os.path.dirname(__file__), "fonts", "index", "*.txt")):
+        basename = os.path.basename(p)
+        if lang == os.path.splitext(basename)[0]:
+            font_index = basename
+            break 
+    with open(os.path.join(os.path.dirname(__file__), "fonts", "index", font_index), "r") as f:
+        fonts = [os.path.join(os.path.dirname(__file__), "fonts", p) for p in f.read().split("\n")] 
     return fonts 
