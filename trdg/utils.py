@@ -34,3 +34,12 @@ def load_fonts(lang):
     with open(os.path.join(os.path.dirname(__file__), "fonts", "index", font_index), "r") as f:
         fonts = [os.path.join(os.path.dirname(__file__), "fonts", p) for p in f.read().split("\n")] 
     return fonts 
+
+
+def add_txt_extension(file_name):
+    if "." not in os.path.basename(file_name):
+        file_name = file_name + ".txt"
+    return file_name 
+
+
+

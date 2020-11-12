@@ -16,7 +16,7 @@ from trdg.string_generator import (
     create_strings_from_wikipedia,
     create_strings_randomly,
 )
-from trdg.utils import load_dict, load_fonts
+from trdg.utils import load_dict, load_fonts, add_txt_extension
 from trdg.data_generator import FakeTextDataGenerator
 from multiprocessing import Pool
 
@@ -289,7 +289,7 @@ def parse_arguments():
         "--font_index",
         type=str,
         nargs="?",
-        help="Define the font index (base name) to be used, font index should be a txt file in the trdg/fonts/index directory",
+        help="Define the font index file to be used, an example is fonts{}latin.txt".format(os.sep), 
     )
     parser.add_argument(
         "-id",
@@ -357,10 +357,11 @@ def main():
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise
-
+    
     # Creating word list
     if args.dict:
         lang_dict = []
+        args.dict = add_txt_extension(args.dict)
         if os.path.isfile(args.dict):
             with open(args.dict, "r", encoding="utf8", errors="ignore") as d:
                 lang_dict = [l for l in d.read().splitlines() if len(l) > 0]
@@ -371,11 +372,22 @@ def main():
 
     # Creating font (path) list
     if args.font_index:
-        with open(os.path.join("fonts", "index", args.font_index), "r") as f:
-            fonts = [os.path.join("fonts", p) for p in f.read().split("\n")] 
+        font_index = args.font_index.split(os.sep)
+        if len(font_index) == 1:
+            font_index_dir = "fonts"
+            font_index_file = font_index[0]
+        elif len(font_index) == 2:
+            font_index_dir, font_index_file = font_index
+        else:
+            raise Exception("Wrong --font_index format, a correct example fonts{}latin.txt".format(os.sep)) 
+        font_index_file = add_txt_extension(font_index_file)  
+        with open(os.path.join(font_index_dir, "index", font_index_file), "r") as f:
+            fonts = [os.path.join(font_index_dir, p) for p in f.read().split("\n")] 
     elif args.font_dir:
         fonts = []
         for p in glob.glob(os.path.join(args.font_dir, "*.ttf")):
+            fonts.append(p) 
+        for p in glob.glob(os.path.join(args.font_dir, "*.otf")):
             fonts.append(p) 
     elif args.font:
         if os.path.isfile(args.font):
