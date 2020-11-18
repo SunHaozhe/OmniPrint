@@ -62,7 +62,6 @@ https://fonts.siliconandhra.org/Peddana-Regular.ttf
 https://fonts.siliconandhra.org/Ponnala.ttf
 https://fonts.siliconandhra.org/Ramaraja-Regular.ttf
 https://fonts.siliconandhra.org/RaviPrakash.ttf
-https://fonts.siliconandhra.org/Sree%20Krushnadevaraya.ttf
 https://fonts.siliconandhra.org/Suravaram.ttf
 https://fonts.siliconandhra.org/TenaliRamakrishna-Regular.ttf
 https://fonts.siliconandhra.org/TimmanaRegular.ttf
@@ -86,7 +85,6 @@ https://img.xiusheji.com/view/202007/01/db7fa57f79ad79ba8927cbe7ff140e77.zip
 https://img.xiusheji.com/view/202007/02/9b253c5c9d1381b794bb490a563cb9f4.zip
 https://img.xiusheji.com/view/202009/23/2020fonts.zip
 https://osdn.jp/downloads/users/8/8642/genjyuugothic-20150607.zip
-https://www.1001freefonts.com/d/20399/balinese-family.zip
 https://www.nepali.info/nepali/fonts/raghu.ttf
 https://www.nepali.info/nepali/fonts/siddhibeta1.ttf
 https://www.senamirmir.com/downloads/jiret.zip
