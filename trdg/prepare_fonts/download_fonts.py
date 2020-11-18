@@ -2,7 +2,6 @@ import os
 import glob
 import argparse
 import shutil
-import wget # https://pypi.org/project/wget/
 import urllib
 import datetime
 import time
@@ -14,6 +13,8 @@ import pandas as pd
 from string import digits as string_digits
 from string import punctuation as string_punctuation
 from collections import defaultdict
+import wget # https://pypi.org/project/wget/
+import pypinyin # https://github.com/mozillazg/python-pinyin
 
 
 def download_func(input_tuple):
@@ -35,14 +36,14 @@ def download_func(input_tuple):
 
 
 def solve_filename_encoding_error(current_dir):
-    """
-    solve encoding error of unzipped font file names 
-    """
-    for path in glob.glob(os.path.join(current_dir, "**", "*"), recursive=True):
-        if os.path.splitext(path)[1] in [".ttf", ".otf", ".ttc", ".TTF", ".OTF", ".TTC"]:
-            new_file_name = os.path.basename(path).encode("cp437").decode("utf-8")
-            if new_file_name != os.path.basename(path):
-                os.rename(path, os.path.join(os.path.dirname(path), new_file_name))
+	"""
+	solve encoding error of unzipped font file names 
+	"""
+	for path in glob.glob(os.path.join(current_dir, "**", "*"), recursive=True):
+		if os.path.splitext(path)[1] in [".ttf", ".otf", ".ttc", ".TTF", ".OTF", ".TTC"]:
+			new_file_name = os.path.basename(path).encode("cp437").decode("utf-8")
+			if new_file_name != os.path.basename(path):
+				os.rename(path, os.path.join(os.path.dirname(path), new_file_name))
 
 
 def rename_lower_case(current_dir):
@@ -59,12 +60,28 @@ def rename_lower_case(current_dir):
 def clean_corrupted_font_names(current_dir, extensions=[".ttf", ".otf", ".ttc"]):
 	for path in glob.glob(os.path.join(current_dir, "**", "*"), recursive=True):
 		if os.path.splitext(path)[1] not in extensions:
-			return
+			continue
 		file_name, ext_ = os.path.splitext(os.path.basename(path)) 
 		dirname = os.path.dirname(path)
 		new_file_name = file_name.strip().lstrip(string_digits).lstrip(string_punctuation)
 		if new_file_name != file_name:
 			os.rename(path, os.path.join(dirname, new_file_name + ext_))
+
+
+def convert_all_cjk_file_names(current_dir, cjk_file_names_df, extensions=[".ttf", ".otf", ".ttc"]):
+	"""
+	convert all file names containing CJK characters into pinyin (latin) form
+	"""
+	for extension in ["*" + xx for xx in extensions]:
+		for path in glob.glob(os.path.join(current_dir, "**", extension), recursive=True):
+			basename = os.path.basename(path)
+			pinyin_list = pypinyin.lazy_pinyin(basename)
+			if basename != "".join(pinyin_list):
+				pinyin_name = "".join([xx.capitalize() for xx in pinyin_list])
+				dirname = os.path.dirname(path)
+				idx_ = current_dir.split(os.sep)[-1]
+				cjk_file_names_df.append((idx_, basename, pinyin_name, dirname))
+				os.rename(path, os.path.join(dirname, pinyin_name))
 
 
 t0 = time.time()
@@ -73,7 +90,7 @@ t0 = time.time()
 parser = argparse.ArgumentParser(description="This script automatically downloads (and unzips) fonts") 
 parser.add_argument("-p", "--nb_processes", type=int, default=None)
 parser.add_argument("-t", "--wait_before_start", type=int, default=5, 
-				    help="Number of seconds to wait before start. Default is 5 seconds")
+					help="Number of seconds to wait before start. Default is 5 seconds")
 parser.add_argument("-i", "--include_ttc", action="store_true", default=False)
 args = parser.parse_args() 
 
@@ -85,12 +102,13 @@ print("Using {} CPU cores.".format(args.nb_processes))
 
 # print some message for the user
 print("Previously downloaded fonts will be deleted when the process starts.")
-print("The process will start in {} seconds.".format(args.wait_before_start))
 
-# countdown
-for i in reversed(range(1, args.wait_before_start + 1)):
-	print(i)
-	time.sleep(1)
+if args.wait_before_start > 0:
+	print("The process will start in {} seconds.".format(args.wait_before_start))
+	# countdown
+	for i in reversed(range(1, args.wait_before_start + 1)):
+		print(i)
+		time.sleep(1)
 
 print("The process starts.")
 print("This can take a while. Please be patient...")
@@ -134,6 +152,7 @@ if args.include_ttc:
 font2url_id = defaultdict(list)
 url_id2font = defaultdict(list)
 
+cjk_file_names_df = []
 for i, flag in enumerate(flags):
 	if flag:
 		current_dir = os.path.join(tmp_save_dir, str(i))
@@ -150,11 +169,16 @@ for i, flag in enumerate(flags):
 		solve_filename_encoding_error(current_dir) 
 		rename_lower_case(current_dir) 
 		clean_corrupted_font_names(current_dir, extensions=extensions)
+		convert_all_cjk_file_names(current_dir, cjk_file_names_df, extensions=extensions)
 		# build the two metadata dictionaries font2url_id and url_id2font
 		for ext_ in ["*" + xx for xx in extensions]:
 			for path in glob.glob(os.path.join(current_dir, "**", ext_), recursive=True):
 				font2url_id[os.path.basename(path)].append(i) 
 				url_id2font[i].append(os.path.basename(path))
+cjk_file_names_df = pd.DataFrame(cjk_file_names_df, columns=["URL_id", "original_name", 
+															 "pinyin_name", "directory"])
+cjk_file_names_df.to_csv("cjk_file_name_table.csv", sep="\t", encoding="utf-8")
+
 
 df["URL_id"] = df.index
 df = df[["URL_id", "URL", "successful_download", "download_UTC_time", "exception_type", "exception"]]

@@ -101,3 +101,12 @@ ENV/
 .mypy_cache/
 
 .vscode/*
+
+# fonts, results and some generated metadata
+trdg/out/
+trdg/fonts/
+trdg/prepare_fonts/font2url_id.pkl
+trdg/prepare_fonts/url_id2font.pkl
+trdg/prepare_fonts/log_download.csv
+trdg/prepare_fonts/cjk_file_name_table.csv
+trdg/prepare_fonts/fonts/

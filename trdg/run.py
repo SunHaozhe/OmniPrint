@@ -128,7 +128,7 @@ def parse_arguments():
         type=str,
         nargs="?",
         help="Define the extension to save the image with",
-        default="jpg",
+        default="png",
     )
     parser.add_argument(
         "-k",

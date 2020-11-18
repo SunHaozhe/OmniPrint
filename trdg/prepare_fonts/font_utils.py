@@ -1,0 +1,250 @@
+import os
+import sys
+import glob
+import re
+import argparse
+import pandas as pd 
+import fontTools.ttLib 
+import numpy as np
+from PIL import Image, ImageFont, ImageDraw
+
+sys.path.append(os.pardir) 
+
+from utils import add_txt_extension
+
+def parse_arguments():
+
+	parser = argparse.ArgumentParser(
+		description="Font management."
+	)
+	parser.add_argument(
+		"--dir", 
+		type=str, 
+		nargs="?", 
+		help="The font directory where all font files are stored together with index files", 
+		default="fonts"
+	)
+	return parser.parse_args()
+
+
+def count_available_fonts(font_directory, metadata_dir_name="metadata"):
+	"""
+	build metadata/available_fonts.csv and save it under font_directory directory  
+	"""
+	columns=["text_set", "available_fonts"]
+	df = [] 
+	font_file_set = set()
+	for path in sorted(glob.glob(os.path.join(font_directory, "index", "*.txt"))):
+		with open(path, "r") as f:
+			available_fonts = f.read().split("\n")
+			if len(available_fonts) == 1 and available_fonts[0].strip() == "":
+				nb_available_fonts = 0
+			else:
+				font_file_set.update(available_fonts)
+				nb_available_fonts = len(available_fonts)
+		df.append([os.path.basename(path), nb_available_fonts])
+	df = pd.DataFrame(df, columns=columns)
+	df.sort_values("text_set", ascending=True, inplace=True)
+	
+	total_count = [["text_sets_count", df.shape[0]], ["distinct_fonts_count", len(font_file_set)]]
+	df = df.append(pd.DataFrame(total_count, columns=columns))
+	df.reset_index(drop=True, inplace=True) 
+
+	metadata_path = os.path.join(font_directory, metadata_dir_name)
+	if not os.path.exists(metadata_path):
+		os.makedirs(metadata_path)
+	df.to_csv(os.path.join(metadata_path, "available_fonts.csv"), sep="\t", encoding="utf-8")
+
+
+def get_available_fonts(text_set_path, font_index):
+	font_index = font_index.split(os.sep)
+	if len(font_index) == 1:
+		font_index_dir = "fonts"
+		font_index_file = font_index[0]
+	elif len(font_index) == 2:
+		font_index_dir, font_index_file = font_index
+	else:
+		raise Exception("Wrong font_index format, a correct example fonts{}latin.txt".format(os.sep)) 
+	font_index_file = add_txt_extension(font_index_file) 
+	with open(os.path.join(font_index_dir, "index", font_index_file), "r") as f:
+		fonts = f.read().split("\n") 
+	return fonts 
+
+
+def normalize_font_name_for_detection(basename):
+    """
+    normalization before detecting last resort fonts and some other fonts 
+    
+    keywords: 
+    bold, black, italic, light, oblique, medium, extra
+    """
+    file_name = os.path.splitext(basename)[0].lower()
+    return re.sub(r"[\d\s\-_.]", "", file_name) 
+
+
+def detect_unwanted_fonts(basename, keywords=[]):
+    """
+    return bool
+    
+    check if basename is the "last resort" font, 
+    this font introduces a box around the character 
+    
+    Possible unwanted keywords include: 
+    bold, heavy, cuti, italic, italique, xieti, yidali, light, 
+    oblique, medium, extra, ultra, slant, skew, thin, 
+    condensed, regular, etc.
+    """
+    normalized_name = normalize_font_name_for_detection(basename)
+    # check if basename is the "last resort" font
+    if "lastresort" in normalized_name:
+        return True
+    # check if basename contains unwanted keywords
+    for keyword in keywords:
+        if keyword in normalized_name:
+            return True 
+    return False 
+
+def ttf_supports_char(ttf, char_): 
+	"""
+	ttf: fontTools.ttLib.ttFont.TTFont object 
+	returns bool 
+	
+	Assuming that font_path ends with .ttf (or .otf), then 
+	ttf = fontTools.ttLib.TTFont(font_path) 
+	""" 
+	for table in ttf["cmap"].tables:
+		try:
+			if ord(char_) in table.cmap.keys():
+				return True
+		except AttributeError:
+			return False 
+	return False
+
+
+def test_pil_compatibility(font_file_path, text_):
+	"""
+	check whether Pillow library can correctly render text_ 
+	with the font defined by font_file_path 
+	"""
+	try:
+		# test stroke_width and size 64
+		size_ = 64
+		img = Image.new("RGB", (size_, size_), 255)
+		draw = ImageDraw.Draw(img)
+		font = ImageFont.truetype(font_file_path, size=size_)
+		draw.text((0, 0), text_, font=font, stroke_width=2)
+		# test size 32 
+		size_ = 32
+		img = Image.new("L", (size_, size_), 255)
+		draw = ImageDraw.Draw(img)
+		font = ImageFont.truetype(font_file_path, size=size_)
+		draw.text((0, 0), text_, font=font)
+	except Exception as e:
+		return False
+	else:
+		# test whether img is falsely blank/constant 
+		arr = np.array(img)
+		first_element = arr[0, 0]
+		if np.all(arr == first_element):
+			if ord(text_) == 32: # 32 is the space character
+				return True
+			else:
+				return False 
+		else:
+			return True  
+
+
+def filter_fonts(font_paths, text_set_file_path, extensions=[".ttf", ".otf"], verbose=False):
+	"""
+	return a subset of font_paths, this subset of font paths fully support 
+	the character set defined by text_set_file_path 
+	
+	Example:
+	font_paths = ["xxx/yyy/Arial.ttf", "xxx/yyy/Yahei.otf", "xxx/yyy/Freemono.ttf"]
+	text_set_file_path = "../alphabets/fine/arabic.txt"
+	"""
+	with open(text_set_file_path, "r") as f:
+		chars = [str(xx) for xx in f.read().split("\n")] 
+	len_chars = len(chars)
+	filtered_font_paths = []
+	for font_path in font_paths:
+		if os.path.splitext(font_path)[1] not in extensions:
+			continue 
+		# transforms font_path to a list of TTFont objects
+		try:
+			if font_path.endswith(".ttc"): 
+				ttfonts = fontTools.ttLib.TTCollection(font_path).fonts 
+			elif font_path.endswith(".ttf") or font_path.endswith(".otf"):
+				ttfonts = [fontTools.ttLib.TTFont(font_path)]
+			else:
+				raise Exception 
+		except Exception as e:
+			if verbose:
+				print(type(e), e, font_path) 
+			continue
+		# verification step: 
+		# 1. verify if all TTFont objects support all characters from chars 
+		# 2. double check with Pillow library 
+		flag = True 
+		for char_ in chars:
+			for ttfont in ttfonts:
+				flag = flag and ttf_supports_char(ttfont, char_)
+			flag = flag and test_pil_compatibility(font_path, char_) 
+		if flag:
+			filtered_font_paths.append(font_path)
+	return sorted(list(set(filtered_font_paths))) 
+
+
+def build_index_files(font_directory, text_set_directory, extensions=[".ttf", ".otf", ".ttc"]):
+	"""
+	build the index files with respect to font files stored in font_directory directory
+
+	Example:
+	font_directory = "fonts"
+	text_set_directory = "../alphabets/fine"
+	"""
+	# collect the list of font paths under the font_directory directory
+	font_paths = []
+	for path in sorted(glob.glob(os.path.join(font_directory, "*"))):
+		if os.path.splitext(path)[1] in extensions:
+			font_paths.append(path)
+	
+	# make sure index directory exists
+	font_index_dir = os.path.join(font_directory, "index")
+	if not os.path.exists(font_index_dir):
+		os.makedirs(font_index_dir)
+
+	# for each text set file (.txt), get the list of compatible fonts, save it to disk (index file)
+	for text_set_file_path in glob.glob(os.path.join(text_set_directory, "**", "*.txt"), recursive=True):
+		filtered_font_paths = filter_fonts(font_paths, text_set_file_path, extensions=extensions)
+		with open(os.path.join(font_index_dir, 
+							   os.path.splitext(os.path.basename(text_set_file_path))[0] + ".txt"), "w") as f:
+			f.write("\n".join(sorted([os.path.basename(xx) for xx in filtered_font_paths])))
+
+
+
+if __name__ == "__main__":
+	
+	# Argument parsing
+	args = parse_arguments()
+
+	metadata_dir_name = "metadata"
+
+	count_available_fonts(args.dir, metadata_dir_name)
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
