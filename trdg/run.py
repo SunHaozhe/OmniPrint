@@ -373,11 +373,14 @@ def main():
     # Creating font (path) list
     if args.font_index:
         font_index = args.font_index.split(os.sep)
-        if len(font_index) == 1:
+        if len(font_index) == 1: # only the text set file
             font_index_dir = "fonts"
             font_index_file = font_index[0]
         elif len(font_index) == 2:
             font_index_dir, font_index_file = font_index
+        elif len(font_index) > 2:
+            font_index_dir = os.sep.join(font_index[:-1])
+            font_index_file = font_index[-1]
         else:
             raise Exception("Wrong --font_index format, a correct example fonts{}latin.txt".format(os.sep)) 
         font_index_file = add_txt_extension(font_index_file)  
