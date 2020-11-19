@@ -3,7 +3,8 @@ import os
 import glob
 import argparse
 import shutil
-from font_utils import build_index_files, count_available_fonts, detect_unwanted_fonts 
+from font_utils import build_index_files, count_available_fonts, delete_unused_fonts 
+from font_utils import detect_unwanted_fonts, configure_NotoCJK_fonts 
 
 
 def transfer_font_files(src_font_paths, target_dir_path, unwanted_keywords, 
@@ -70,8 +71,14 @@ transfer_font_files(paths, target_directory, unwanted_keywords)
 # build index files which are necessary for data generation
 build_index_files(target_directory, args.text_set_directory, extensions=extensions)
 
+# configure NotoCJK fonts 
+configure_NotoCJK_fonts(target_directory)
+
 # build available_fonts.csv which consists of useful metadata
 count_available_fonts(target_directory, args.metadata_dir_name)
+
+# delete unused fonts in the target font directory
+delete_unused_fonts(target_directory, extensions)
 
 if not args.keep_temporary_directory:
 	shutil.rmtree(tmp_save_dir) 

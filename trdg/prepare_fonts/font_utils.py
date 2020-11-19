@@ -72,37 +72,37 @@ def get_available_fonts(text_set_path, font_index):
 
 
 def normalize_font_name_for_detection(basename):
-    """
-    normalization before detecting last resort fonts and some other fonts 
-    
-    keywords: 
-    bold, black, italic, light, oblique, medium, extra
-    """
-    file_name = os.path.splitext(basename)[0].lower()
-    return re.sub(r"[\d\s\-_.]", "", file_name) 
+	"""
+	normalization before detecting last resort fonts and some other fonts 
+	
+	keywords: 
+	bold, black, italic, light, oblique, medium, extra
+	"""
+	file_name = os.path.splitext(basename)[0].lower()
+	return re.sub(r"[\d\s\-_.]", "", file_name) 
 
 
 def detect_unwanted_fonts(basename, keywords=[]):
-    """
-    return bool
-    
-    check if basename is the "last resort" font, 
-    this font introduces a box around the character 
-    
-    Possible unwanted keywords include: 
-    bold, heavy, cuti, italic, italique, xieti, yidali, light, 
-    oblique, medium, extra, ultra, slant, skew, thin, 
-    condensed, regular, etc.
-    """
-    normalized_name = normalize_font_name_for_detection(basename)
-    # check if basename is the "last resort" font
-    if "lastresort" in normalized_name:
-        return True
-    # check if basename contains unwanted keywords
-    for keyword in keywords:
-        if keyword in normalized_name:
-            return True 
-    return False 
+	"""
+	return bool
+	
+	check if basename is the "last resort" font, 
+	this font introduces a box around the character 
+	
+	Possible unwanted keywords include: 
+	bold, heavy, cuti, italic, italique, xieti, yidali, light, 
+	oblique, medium, extra, ultra, slant, skew, thin, 
+	condensed, regular, etc.
+	"""
+	normalized_name = normalize_font_name_for_detection(basename)
+	# check if basename is the "last resort" font
+	if "lastresort" in normalized_name:
+		return True
+	# check if basename contains unwanted keywords
+	for keyword in keywords:
+		if keyword in normalized_name:
+			return True 
+	return False 
 
 def ttf_supports_char(ttf, char_): 
 	"""
@@ -221,6 +221,55 @@ def build_index_files(font_directory, text_set_directory, extensions=[".ttf", ".
 							   os.path.splitext(os.path.basename(text_set_file_path))[0] + ".txt"), "w") as f:
 			f.write("\n".join(sorted([os.path.basename(xx) for xx in filtered_font_paths])))
 
+
+def is_unwanted_NotoCJK(font_file, unwanted_list):
+	if font_file.startswith("Noto"):
+		for unwanted in unwanted_list:
+			if unwanted in font_file:
+				return True
+	else:
+		return False 
+
+
+def rebuild_cjk_index_file_for_NotoCJK(basename, path, keywords, unwanted_list):
+	for keyword in keywords:
+		if keyword in basename: 
+			with open(path, "r") as f:
+				font_files = f.read().split("\n")
+			new_font_files = []
+			for font_file in font_files:
+				if not is_unwanted_NotoCJK(font_file, unwanted_list):
+					new_font_files.append(font_file)
+			with open(path, "w") as f:
+				f.write("\n".join(new_font_files))
+
+
+def configure_NotoCJK_fonts(font_directory):
+	chinese_keywords = ["chinese"]
+	korean_keywords = ["korean"]
+	japanese_keywords = ["hiragana", "katakana"]
+
+	chinese_unwanted_list = ["CJKjp", "CJKkr", "CJKtc"]
+	korean_unwanted_list = ["CJKjp", "CJKsc", "CJKtc"]
+	japanese_unwanted_list = ["CJKsc", "CJKkr", "CJKtc"]
+	
+	for path in glob.glob(os.path.join(font_directory, "index", "**", "*.txt"), recursive=True):
+		basename = os.path.basename(path)
+		rebuild_cjk_index_file_for_NotoCJK(basename, path, chinese_keywords, chinese_unwanted_list)
+		rebuild_cjk_index_file_for_NotoCJK(basename, path, korean_keywords, korean_unwanted_list)
+		rebuild_cjk_index_file_for_NotoCJK(basename, path, japanese_keywords, japanese_unwanted_list)
+
+
+def delete_unused_fonts(font_directory, extensions):
+	used = set()
+	for path in glob.glob(os.path.join(font_directory, "index", "*.txt")):
+		with open(path, "r") as f:
+			used.update(f.read().split("\n"))
+
+	for file_name in os.listdir(font_directory):
+		if os.path.splitext(file_name)[1] in extensions:
+			if os.path.basename(file_name) not in used: 
+				os.remove(os.path.join(font_directory, file_name))
 
 
 if __name__ == "__main__":
