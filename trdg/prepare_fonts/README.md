@@ -12,7 +12,7 @@ Otherwise, sequentially run the following commands:
 
 ```zsh
 python3 download_fonts.py
-python3 font_directory.py -d ../alphabets/fine
+python3 build_font_directory.py -d ../alphabets/fine
 ```
 
 On the tested machine, the script `download_fonts.py` took about 20 minutes, the script `font_directory.py` took about 65 minutes. In total, the expected executation time ranges from 70 minutes to 90 minutes. The execution time of the first command partly depends on internet connection. 
@@ -24,7 +24,7 @@ During the download, some temporary files will be created, they will be cleaned 
 At the end of the second script, the temporary directory which includes all downloaded fonts and other files will be deleted by default in order to save space. If you wish to keep this temporary directory, please do the following:
 
 ```zsh
-python3 font_directory.py -d ../alphabets/fine --keep_temporary_directory
+python3 build_font_directory.py -d ../alphabets/fine --keep_temporary_directory
 ```
 
 
