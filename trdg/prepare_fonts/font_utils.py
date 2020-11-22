@@ -153,6 +153,22 @@ def test_pil_compatibility(font_file_path, text_):
 		else:
 			return True  
 
+# problematic font files 
+_hard_coded_black_list = ['albayan', 'baghdad', 'capture_it_2', 'courier new', 'gurumaa-2.04', 
+						  'hoefler text ornaments', 'keyboard', 'kufistandardgk', 'lohit_as', 
+						  'lohit_bn', 'nadeem', 'notoserifthai-black', 'notoserifthai-condensed', 
+						  'notoserifthai-condensedblack', 'notoserifthai-regular', 
+						  'notoserifthai-semicondensed', 'notoserifthai-semicondensedblack', 
+						  'osho_v125.ttf', 'samyak-devanagari', 'samyak-gujarati', 'utibetan', 
+						  'webdings', 'wingdings', 'wingdings 2', 'wingdings 3', 'zapfdingbats']
+
+
+_non_language_text_set_file_name_list = ["ascii_digits", "common_punctuations_symbols", 
+										 "mathematical_operators", "musical_symbols"]
+_non_language_symbol_font_black_list = ['tamu_kadampari', 'tamu_kalyani', 'tamu_maduram', 
+										'tscu_comic', 'tscu_paranar', 'tscu_paranarb', 
+										'tscu_paranari', 'mitra']
+
 
 def filter_fonts(font_paths, text_set_file_path, extensions=[".ttf", ".otf"], verbose=False):
 	"""
@@ -167,9 +183,18 @@ def filter_fonts(font_paths, text_set_file_path, extensions=[".ttf", ".otf"], ve
 		chars = [str(xx) for xx in f.read().split("\n")] 
 	len_chars = len(chars)
 	filtered_font_paths = []
+	lowered_text_set_file_name = os.path.splitext(os.path.basename(text_set_file_path))[0].lower()
 	for font_path in font_paths:
+		# test if this is a font file 
 		if os.path.splitext(font_path)[1] not in extensions:
 			continue 
+		# filter out problematic font files (manually selected) 
+		lowered_font_name = os.path.splitext(os.path.basename(font_path))[0].lower()
+		if lowered_font_name in _hard_coded_black_list:
+			continue 
+		if lowered_text_set_file_name in _non_language_text_set_file_name_list:
+			if lowered_font_name in _non_language_symbol_font_black_list:
+				continue 
 		# transforms font_path to a list of TTFont objects
 		try:
 			if font_path.endswith(".ttc"): 
