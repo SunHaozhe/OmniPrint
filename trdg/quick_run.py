@@ -30,24 +30,18 @@ if __name__ == "__main__":
 
 	ignore_list = ["__module__", "__dict__", "__weakref__", "__doc__"]
 
-	tmp = vars(Parameters) 
-	parameters = {}
-	for key, value in tmp.items():
+	cmd = "python3 run.py"
+	
+	parameters = vars(Parameters) 
+	for key, value in parameters.items():
 		if key in ignore_list:
 			continue 
 		if len(key) >= 2 and key[-1] == "_" and key[-2] != "_":
 			key = key[:-1]
-		if isinstance(value, bool):
-				parameters[key] = value
-		else:
-			parameters[key] = str(value)
-	
-	cmd = "python3 run.py"
-	for key, value in parameters.items():
 		if isinstance(value, bool) and value:
 			cmd += " --{}".format(key)
 		else:
-			cmd += " --{} {}".format(key, value)
+			cmd += " --{} {}".format(key, str(value))
 	
 	# run the command 
 	subprocess.call(cmd.split())
