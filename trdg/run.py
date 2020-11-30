@@ -8,6 +8,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import random as rnd
 import string
 import sys
+import numpy as np 
 
 from tqdm import tqdm
 from trdg.string_generator import (
@@ -346,6 +347,13 @@ def parse_arguments():
         help="Define the image mode to be used. RGB is default, L means 8-bit grayscale images, 1 means 1-bit binary images stored with one pixel per byte, etc.",
         default="RGB",
     )
+    parser.add_argument(
+        "-rsd",
+        "--random_seed",
+        type=int,
+        help="Random seed",
+        default=None,
+    )
     return parser.parse_args()
 
 
@@ -357,6 +365,10 @@ def main():
     # Argument parsing
     args = parse_arguments()
 
+    if args.random_seed is not None:
+        rnd.seed(args.random_seed)
+        np.random.seed(2 * args.random_seed + 1)
+    
     # Create the directory if it does not exist.
     try:
         os.makedirs(args.output_dir)
