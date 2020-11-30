@@ -90,10 +90,10 @@ def _apply_func_distorsion(image, mask, vertical, horizontal, max_offset, func):
     return (
         Image.fromarray(
             np.uint8(new_img_arr_copy if horizontal and vertical else new_img_arr)
-        ).convert("RGBA"),
+        ).convert("RGB"),
         Image.fromarray(
             np.uint8(new_mask_arr_copy if horizontal and vertical else new_mask_arr)
-        ).convert("RGB"),
+        ).convert("L"),
     )
 
 

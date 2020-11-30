@@ -1,10 +1,12 @@
 import os
 import random as rnd
+import math 
+import numpy as np 
 
 import PIL
 from PIL import Image, ImageFilter
 
-from trdg import computer_text_generator, background_generator, distorsion_generator
+from trdg import freetype_text_generator, background_generator, distorsion_generator
 
 try:
     from trdg import handwritten_text_generator
@@ -54,11 +56,17 @@ class FakeTextDataGenerator(object):
         stroke_fill="#282828",
         image_mode="RGB"
     ):
-        image = None
+        ensure_square_layout = True
 
-        margin_top, margin_left, margin_bottom, margin_right = margins
-        horizontal_margin = margin_left + margin_right
-        vertical_margin = margin_top + margin_bottom
+        margin_top, margin_left, margin_bottom, margin_right = margins  
+        assert margin_top >= 0, "Margins cannot be negative." 
+        assert margin_left >= 0, "Margins cannot be negative." 
+        assert margin_bottom >= 0, "Margins cannot be negative." 
+        assert margin_right >= 0, "Margins cannot be negative." 
+        assert margin_top + margin_bottom < 1, "Sum of vertical margins exceeds limit."
+        assert margin_left + margin_right < 1, "Sum of horizontal margins exceeds limit."
+        if ensure_square_layout:
+            assert margin_top + margin_bottom == margin_left + margin_right, _warning_square_layout
 
         ##########################
         # Create picture of text #
@@ -68,28 +76,19 @@ class FakeTextDataGenerator(object):
                 raise ValueError("Vertical handwritten text is unavailable")
             img, mask = handwritten_text_generator.generate(text, text_color)
         else:
-            img, mask = computer_text_generator.generate(
-                text,
-                font,
-                text_color,
-                size,
-                orientation,
-                space_width,
-                character_spacing,
-                fit,
-                word_split,
-                stroke_width, 
-                stroke_fill,
-            )
-        random_angle = rnd.randint(0 - skewing_angle, skewing_angle)
+            img, mask = freetype_text_generator.render_lt_text(text, 
+                                                               font, 
+                                                               transform_param=None, 
+                                                               font_size=192, 
+                                                               font_weight=None, 
+                                                               stroke_radius=None, 
+                                                               stroke_fill=None)
 
-        img = img.rotate(
-            skewing_angle if not random_skew else random_angle, expand=1
-        )
+        ##############################
+        # Place transformations here #
+        ##############################
 
-        mask = mask.rotate(
-            skewing_angle if not random_skew else random_angle, expand=1
-        )
+
 
         #############################
         # Apply distorsion to image #
@@ -122,91 +121,52 @@ class FakeTextDataGenerator(object):
         # Resize image to desired format #
         ##################################
 
-        # Horizontal text
-        if orientation == 0:
-            new_width = int(
-                img.size[0]
-                * (float(size - vertical_margin) / float(img.size[1]))
-            )
-            img = img.resize(
-                (new_width, size - vertical_margin), Image.ANTIALIAS
-            )
-            mask = mask.resize((new_width, size - vertical_margin), Image.NEAREST)
-            background_width = width if width > 0 else new_width + horizontal_margin
-            background_height = size
-        # Vertical text
-        elif orientation == 1:
-            new_height = int(
-                float(img.size[1])
-                * (float(size - horizontal_margin) / float(img.size[0]))
-            )
-            img = img.resize(
-                (size - horizontal_margin, new_height), Image.ANTIALIAS
-            )
-            mask = mask.resize(
-                (size - horizontal_margin, new_height), Image.NEAREST
-            )
-            background_width = size
-            background_height = new_height + vertical_margin
+        if ensure_square_layout:
+            max_size = max(img.size[0], img.size[1]) 
+            background_w = math.ceil(max_size / (1 - margin_left - margin_right))
+            background_h = math.ceil(max_size / (1 - margin_top - margin_bottom)) 
+            offset_x = (max_size - img.size[0]) // 2 + math.floor(background_w * margin_left)
+            offset_y = (max_size - img.size[1]) // 2 + math.floor(background_h * margin_top)
         else:
-            raise ValueError("Invalid orientation")
+            background_w = math.ceil(img.size[0] / (1 - margin_left - margin_right))
+            background_h = math.ceil(img.size[1] / (1 - margin_top - margin_bottom)) 
+            offset_x = math.floor(background_w * margin_left)
+            offset_y = math.floor(background_h * margin_top)
+        background = Image.new("RGB", (background_w, background_h), (255, 255, 255))    
+        background.paste(img, (offset_x, offset_y), mask)
+        background_mask = Image.new("L", (background_w, background_h), 0)    
+        background_mask.paste(mask, (offset_x, offset_y), mask)
+        img = background 
+        mask = background_mask 
+
+        final_h = size 
+        if ensure_square_layout:
+            final_w = size
+        else:
+            final_w = math.ceil(final_h * img.size[0] / img.size[1])
+        img = img.resize((final_w, final_h), resample=Image.LANCZOS, reducing_gap=4)
+        mask = mask.resize((final_w, final_h), resample=Image.LANCZOS, reducing_gap=4)
+
+        # make mask binary (255 or 0)
+        mask = np.array(mask)
+        mask[mask != 0] = 255
+        mask = Image.fromarray(mask)
 
         #############################
         # Generate background image #
         #############################
         if background_type == 0:
-            background_img = background_generator.gaussian_noise(
-                background_height, background_width
-            )
+            background_img = background_generator.gaussian_noise(final_h, final_w)
         elif background_type == 1:
-            background_img = background_generator.plain_white(
-                background_height, background_width
-            )
+            background_img = background_generator.plain_white(final_h, final_w)
         elif background_type == 2:
-            background_img = background_generator.quasicrystal(
-                background_height, background_width
-            )
+            background_img = background_generator.quasicrystal(final_h, final_w)
         else:
-            background_img = background_generator.image(
-                background_height, background_width, image_dir
-            )
-        background_mask = Image.new(
-            "RGB", (background_width, background_height), (0, 0, 0)
-        )
+            background_img = background_generator.image(final_h, final_w, image_dir)
 
-        #############################
-        # Place text with alignment #
-        #############################
-
-        new_text_width, _ = img.size
-
-        if alignment == 0 or width == -1:
-            background_img.paste(img, (margin_left, margin_top), img)
-            background_mask.paste(mask, (margin_left, margin_top))
-        elif alignment == 1:
-            background_img.paste(
-                img,
-                (int(background_width / 2 - new_text_width / 2), margin_top),
-                img,
-            )
-            background_mask.paste(
-                mask,
-                (int(background_width / 2 - new_text_width / 2), margin_top),
-            )
-        else:
-            background_img.paste(
-                img,
-                (background_width - new_text_width - margin_right, margin_top),
-                img,
-            )
-            background_mask.paste(
-                mask,
-                (background_width - new_text_width - margin_right, margin_top),
-            )
-
+        background_img.paste(img, (0, 0), mask)
         img = background_img
-        mask = background_mask
-
+        
         #######################
         # Apply gaussian blur #
         #######################
@@ -221,8 +181,7 @@ class FakeTextDataGenerator(object):
         # Change image mode (RGB, grayscale, etc.) #
         ############################################
         
-        img = img.convert(image_mode)
-        mask = mask.convert(image_mode) 
+        img = img.convert(image_mode) 
 
         #####################################
         # Generate name for resulting image #
