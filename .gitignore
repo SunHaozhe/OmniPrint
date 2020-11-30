@@ -112,3 +112,4 @@ trdg/prepare_fonts/cjk_file_name_table.csv
 trdg/prepare_fonts/fonts/
 trdg/prepare_fonts/temporary_save_directory
 trdg/prepare_fonts/*.tmp
+trdg/quick_run.py

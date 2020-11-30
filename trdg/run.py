@@ -21,11 +21,17 @@ from trdg.data_generator import FakeTextDataGenerator
 from multiprocessing import Pool
 
 
-def margins(margin):
-    margins = margin.split(",")
-    if len(margins) == 1:
-        return [int(margins[0])] * 4
-    return [int(m) for m in margins]
+def parse_margins(x):
+    x = x.split(",")
+    if len(x) == 1:
+        return [int(x[0])] * 4
+    return [int(m) for m in x]
+
+def parse_affine_perspective_transformations(x):
+    x = x.split(",")
+    if len(x) == 1:
+        return [float(x[0])] * 6
+    return [float(m) for m in x]
 
 
 def parse_arguments():
@@ -262,10 +268,10 @@ def parse_arguments():
     parser.add_argument(
         "-m",
         "--margins",
-        type=margins,
+        type=parse_margins,
         nargs="?",
         help="Define the margins around the text when rendered. In pixels",
-        default=(5, 5, 5, 5),
+        default=[5, 5, 5, 5],
     )
     parser.add_argument(
         "-fi",
@@ -330,7 +336,7 @@ def parse_arguments():
         type=str, 
         nargs="?",
         help="Define the color of the contour of the strokes, if stroke_width is bigger than 0",
-        default="#282828",
+        default="#282828", # black by default 
     )
     parser.add_argument(
         "-im",
@@ -385,7 +391,7 @@ def main():
             raise Exception("Wrong --font_index format, a correct example fonts{}latin.txt".format(os.sep)) 
         font_index_file = add_txt_extension(font_index_file)  
         with open(os.path.join(font_index_dir, "index", font_index_file), "r") as f:
-            fonts = [os.path.join(font_index_dir, p) for p in f.read().split("\n")] 
+            fonts = [os.path.join(font_index_dir, "fonts", p) for p in f.read().split("\n")] 
     elif args.font_dir:
         fonts = []
         for p in glob.glob(os.path.join(args.font_dir, "*.ttf")):
@@ -477,7 +483,7 @@ def main():
                 [args.image_dir] * string_count,
                 [args.stroke_width] * string_count,
                 [args.stroke_fill] * string_count,
-                [args.image_mode] * string_count,
+                [args.image_mode] * string_count
             ),
         ),
         total=args.count,

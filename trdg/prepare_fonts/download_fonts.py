@@ -13,6 +13,7 @@ import pandas as pd
 from string import digits as string_digits
 from string import punctuation as string_punctuation
 from collections import defaultdict
+import tqdm
 import wget # https://pypi.org/project/wget/
 import pypinyin # https://github.com/mozillazg/python-pinyin
 
@@ -130,7 +131,10 @@ with open("predefined_url_list.txt", "r") as f:
 
 # download fonts 
 with multiprocessing.Pool(args.nb_processes) as pool:
-	imap_it = pool.imap(download_func, zip(URLs, range(len(URLs)), itertools.repeat(tmp_save_dir)))
+	imap_it = list(tqdm.tqdm(pool.imap(download_func, 
+									   zip(URLs, range(len(URLs)), 
+									   itertools.repeat(tmp_save_dir))), 
+				   total=len(URLs))) 
 	df = []
 	for current_utc_time, url, exception_type, exception_ in imap_it:
 		df.append((url, current_utc_time, exception_type, exception_))

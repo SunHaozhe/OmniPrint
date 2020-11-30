@@ -7,6 +7,7 @@ import pandas as pd
 import fontTools.ttLib 
 import numpy as np
 from PIL import Image, ImageFont, ImageDraw
+from freetype import Face
 
 sys.path.append(os.pardir) 
 
@@ -46,7 +47,15 @@ def count_available_fonts(font_directory, metadata_dir_name="metadata"):
 	df = pd.DataFrame(df, columns=columns)
 	df.sort_values("text_set", ascending=True, inplace=True)
 	
-	total_count = [["text_sets_count", df.shape[0]], ["distinct_fonts_count", len(font_file_set)]]
+	# count the number of index files for variable font weight 
+	variable_weight_prefix = "variable_weight_"
+	variable_weight_count = 0
+	for text_set in df["text_set"].tolist():
+		if text_set.startswith(variable_weight_prefix):
+			variable_weight_count += 1
+
+	total_count = [["distinct_text_sets_count", df.shape[0] - variable_weight_count], 
+				   ["distinct_fonts_count", len(font_file_set)]] 
 	df = df.append(pd.DataFrame(total_count, columns=columns))
 	df.reset_index(drop=True, inplace=True) 
 
@@ -59,10 +68,11 @@ def count_available_fonts(font_directory, metadata_dir_name="metadata"):
 def get_available_fonts(text_set_path, font_index):
 	font_index = font_index.split(os.sep)
 	if len(font_index) == 1:
-		font_index_dir = "fonts"
+		font_index_dir = os.path.join("fonts", "fonts")
 		font_index_file = font_index[0]
 	elif len(font_index) == 2:
 		font_index_dir, font_index_file = font_index
+		font_index_dir = os.path.join(font_index_dir, "fonts")
 	else:
 		raise Exception("Wrong font_index format, a correct example fonts{}latin.txt".format(os.sep)) 
 	font_index_file = add_txt_extension(font_index_file) 
@@ -153,6 +163,37 @@ def test_pil_compatibility(font_file_path, text_):
 		else:
 			return True  
 
+
+def test_freetype_compatibility(font_file_path, text_):
+	try:
+		face = Face(font_file_path) 
+		face.set_char_size(12288) 
+		face.load_char(text_)
+		bitmap = face.glyph.bitmap 
+		bitmap = face.glyph.bitmap
+		width  = face.glyph.bitmap.width
+		rows   = face.glyph.bitmap.rows
+		pitch  = face.glyph.bitmap.pitch
+		img = []
+		for i in range(rows):
+			img.extend(bitmap.buffer[i * pitch : i * pitch + width])
+		img = np.array(img, dtype=np.ubyte).reshape(rows, width)
+		img = Image.fromarray(np.invert(img))
+	except Exception as e:
+		return False
+	else:
+		# test whether img is falsely blank/constant 
+		arr = np.array(img)
+		first_element = arr[0, 0]
+		if np.all(arr == first_element):
+			if ord(text_) == 32: # 32 is the space character
+				return True
+			else:
+				return False 
+		else:
+			return True 
+
+
 # problematic font files 
 _hard_coded_black_list = ['albayan', 'baghdad', 'capture_it_2', 'courier new', 'gurumaa-2.04', 
 						  'hoefler text ornaments', 'keyboard', 'kufistandardgk', 'lohit_as', 
@@ -210,11 +251,13 @@ def filter_fonts(font_paths, text_set_file_path, extensions=[".ttf", ".otf"], ve
 		# verification step: 
 		# 1. verify if all TTFont objects support all characters from chars 
 		# 2. double check with Pillow library 
+		# 3. double check with freetype library 
 		flag = True 
 		for char_ in chars:
 			for ttfont in ttfonts:
 				flag = flag and ttf_supports_char(ttfont, char_)
 			flag = flag and test_pil_compatibility(font_path, char_) 
+			flag = flag and test_freetype_compatibility(font_path, char_)
 		if flag:
 			filtered_font_paths.append(font_path)
 	return sorted(list(set(filtered_font_paths))) 
@@ -230,7 +273,7 @@ def build_index_files(font_directory, text_set_directory, extensions=[".ttf", ".
 	"""
 	# collect the list of font paths under the font_directory directory
 	font_paths = []
-	for path in sorted(glob.glob(os.path.join(font_directory, "*"))):
+	for path in sorted(glob.glob(os.path.join(font_directory, "fonts", "**", "*"), recursive=True)):
 		if os.path.splitext(path)[1] in extensions:
 			font_paths.append(path)
 	
@@ -240,7 +283,7 @@ def build_index_files(font_directory, text_set_directory, extensions=[".ttf", ".
 		os.makedirs(font_index_dir)
 
 	# for each text set file (.txt), get the list of compatible fonts, save it to disk (index file)
-	for text_set_file_path in glob.glob(os.path.join(text_set_directory, "**", "*.txt"), recursive=True):
+	for text_set_file_path in sorted(glob.glob(os.path.join(text_set_directory, "**", "*.txt"), recursive=True)):
 		filtered_font_paths = filter_fonts(font_paths, text_set_file_path, extensions=extensions)
 		with open(os.path.join(font_index_dir, 
 							   os.path.splitext(os.path.basename(text_set_file_path))[0] + ".txt"), "w") as f:
@@ -287,14 +330,121 @@ def configure_NotoCJK_fonts(font_directory):
 
 def delete_unused_fonts(font_directory, extensions):
 	used = set()
-	for path in glob.glob(os.path.join(font_directory, "index", "*.txt")):
+	for path in glob.glob(os.path.join(font_directory, "index", "**", "*.txt"), recursive=True):
 		with open(path, "r") as f:
 			used.update(f.read().split("\n"))
 
+	font_directory = os.path.join(font_directory, "fonts")
 	for file_name in os.listdir(font_directory):
 		if os.path.splitext(file_name)[1] in extensions:
 			if os.path.basename(file_name) not in used: 
 				os.remove(os.path.join(font_directory, file_name))
+
+
+def generate_one_font_description(path):
+	try:
+		face = Face(path)
+	except Exception:
+		print(path)
+		raise
+
+	basename = os.path.basename(path) 
+	suffix = os.path.splitext(path)[1][1:]
+	family_name = face.family_name.decode("utf-8")
+	style_name = face.style_name.decode("utf-8")
+	postscript_name = face.postscript_name or "N/A"
+	if not isinstance(postscript_name, str):
+		postscript_name = postscript_name.decode("utf-8") 
+	num_faces = face.num_faces
+	num_glyphs = face.num_glyphs 
+	has_multiple_masters = face.has_multiple_masters
+	variation_axes_count = 0 
+	variable_font_weight = False 
+	min_font_weight = "N/A"
+	max_font_weight = "N/A"
+	if has_multiple_masters:
+		ttfont = fontTools.ttLib.TTFont(path) 
+		for axis in ttfont["fvar"].axes:
+			variation_axes_count += 1 
+			if axis.axisTag == "wght":
+				try:
+					face.set_var_design_coords(((axis.minValue + axis.maxValue) // 2,))
+				except Exception:
+					pass 
+				else:
+					variable_font_weight = True
+					min_font_weight = axis.minValue
+					max_font_weight = axis.maxValue 
+				finally:
+					face = Face(path) 
+	try:
+		charmap_encoding_name = face.charmap.encoding_name 
+	except Exception:
+		charmap_encoding_name = "N/A"
+	has_horizontal = face.has_horizontal
+	has_vertical = face.has_vertical
+	has_kerning = face.has_kerning
+	has_fixed_sizes = face.has_fixed_sizes
+	num_fixed_sizes = face.num_fixed_sizes
+	is_fixed_width = face.is_fixed_width
+	is_scalable = face.is_scalable
+	has_glyph_names = face.has_glyph_names
+	units_per_EM = face.units_per_EM
+	face_format = face.get_format().decode("utf-8")
+	is_sfnt = face.is_sfnt
+	sfnt_name_count = face.sfnt_name_count
+	is_tricky = face.is_tricky 
+
+	return basename, suffix, family_name, style_name, postscript_name, num_faces, num_glyphs, \
+		   has_multiple_masters, variation_axes_count, variable_font_weight, min_font_weight, \
+		   max_font_weight, charmap_encoding_name, has_horizontal, has_vertical, has_kerning, \
+		   has_fixed_sizes, num_fixed_sizes, is_fixed_width, is_scalable, has_glyph_names, \
+		   units_per_EM, face_format, is_sfnt, sfnt_name_count, is_tricky 
+
+
+def generate_font_description(font_directory, extensions=[".ttf", ".otf"], metadata_dir_name="metadata"):
+	df = []
+	for path in sorted(glob.glob(os.path.join(font_directory, "fonts", "**", "*"), recursive=True)):
+		if os.path.splitext(path)[1] not in extensions:
+			continue
+		df.append(generate_one_font_description(path))
+	columns = ["font_file", "suffix", "family_name", "style_name", "postscript_name", 
+			   "num_faces", "num_glyphs", "has_multiple_masters", "variation_axes_count", 
+			   "variable_font_weight", "min_font_weight", "max_font_weight", 
+			   "charmap_encoding_name", "has_horizontal", "has_vertical", "has_kerning", 
+			   "has_fixed_sizes", "num_fixed_sizes", "is_fixed_width", "is_scalable", 
+			   "has_glyph_names", "units_per_EM", "face_format", "is_sfnt", 
+			   "sfnt_name_count", "is_tricky"] 
+	df = pd.DataFrame(df, columns=columns)
+
+	metadata_path = os.path.join(font_directory, metadata_dir_name)
+	if not os.path.exists(metadata_path):
+		os.makedirs(metadata_path)
+	df.to_csv(os.path.join(metadata_path, "font_description.csv"), sep="\t", encoding="utf-8")
+
+
+def generate_variable_weight_font_index(font_directory, prefix="variable_weight_", metadata_dir_name="metadata"):
+	variable_weight = pd.read_csv(os.path.join(font_directory, metadata_dir_name, "font_description.csv"), 
+								  sep="\t", encoding="utf-8")
+	variable_weight = variable_weight.loc[variable_weight["variable_font_weight"], "font_file"].tolist()
+	index_path = os.path.join(font_directory, "index") 
+	for path in sorted(glob.glob(os.path.join(font_directory, "index", "**", "*.txt"), recursive=True)):
+		basename = os.path.basename(path)
+		if basename.startswith(prefix):
+			continue
+		text_set_name = os.path.splitext(basename)[0] 
+		with open(path, "r") as f:
+			candidate_fonts = f.read().split("\n")
+		valid_fonts = []
+		for candidate in candidate_fonts:
+			if candidate in variable_weight:
+				valid_fonts.append(candidate)
+		if len(valid_fonts) == 0:
+			continue 
+		if not os.path.exists(index_path):
+			os.makedirs(index_path)
+		with open(os.path.join(index_path, prefix + text_set_name + ".txt"), "w") as f:
+			f.write("\n".join(sorted(valid_fonts))) 
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 import os
 import random as rnd
 
+import PIL
 from PIL import Image, ImageFilter
 
 from trdg import computer_text_generator, background_generator, distorsion_generator
@@ -51,7 +52,7 @@ class FakeTextDataGenerator(object):
         image_dir,
         stroke_width=0, 
         stroke_fill="#282828",
-        image_mode="RGB", 
+        image_mode="RGB"
     ):
         image = None
 
@@ -65,9 +66,9 @@ class FakeTextDataGenerator(object):
         if is_handwritten:
             if orientation == 1:
                 raise ValueError("Vertical handwritten text is unavailable")
-            image, mask = handwritten_text_generator.generate(text, text_color)
+            img, mask = handwritten_text_generator.generate(text, text_color)
         else:
-            image, mask = computer_text_generator.generate(
+            img, mask = computer_text_generator.generate(
                 text,
                 font,
                 text_color,
@@ -82,11 +83,11 @@ class FakeTextDataGenerator(object):
             )
         random_angle = rnd.randint(0 - skewing_angle, skewing_angle)
 
-        rotated_img = image.rotate(
+        img = img.rotate(
             skewing_angle if not random_skew else random_angle, expand=1
         )
 
-        rotated_mask = mask.rotate(
+        mask = mask.rotate(
             skewing_angle if not random_skew else random_angle, expand=1
         )
 
@@ -94,26 +95,25 @@ class FakeTextDataGenerator(object):
         # Apply distorsion to image #
         #############################
         if distorsion_type == 0:
-            distorted_img = rotated_img  # Mind = blown
-            distorted_mask = rotated_mask
+            pass 
         elif distorsion_type == 1:
-            distorted_img, distorted_mask = distorsion_generator.sin(
-                rotated_img,
-                rotated_mask,
+            img, mask = distorsion_generator.sin(
+                img,
+                mask,
                 vertical=(distorsion_orientation == 0 or distorsion_orientation == 2),
                 horizontal=(distorsion_orientation == 1 or distorsion_orientation == 2),
             )
         elif distorsion_type == 2:
-            distorted_img, distorted_mask = distorsion_generator.cos(
-                rotated_img,
-                rotated_mask,
+            img, mask = distorsion_generator.cos(
+                img,
+                mask,
                 vertical=(distorsion_orientation == 0 or distorsion_orientation == 2),
                 horizontal=(distorsion_orientation == 1 or distorsion_orientation == 2),
             )
         else:
-            distorted_img, distorted_mask = distorsion_generator.random(
-                rotated_img,
-                rotated_mask,
+            img, mask = distorsion_generator.random(
+                img,
+                mask,
                 vertical=(distorsion_orientation == 0 or distorsion_orientation == 2),
                 horizontal=(distorsion_orientation == 1 or distorsion_orientation == 2),
             )
@@ -125,25 +125,25 @@ class FakeTextDataGenerator(object):
         # Horizontal text
         if orientation == 0:
             new_width = int(
-                distorted_img.size[0]
-                * (float(size - vertical_margin) / float(distorted_img.size[1]))
+                img.size[0]
+                * (float(size - vertical_margin) / float(img.size[1]))
             )
-            resized_img = distorted_img.resize(
+            img = img.resize(
                 (new_width, size - vertical_margin), Image.ANTIALIAS
             )
-            resized_mask = distorted_mask.resize((new_width, size - vertical_margin), Image.NEAREST)
+            mask = mask.resize((new_width, size - vertical_margin), Image.NEAREST)
             background_width = width if width > 0 else new_width + horizontal_margin
             background_height = size
         # Vertical text
         elif orientation == 1:
             new_height = int(
-                float(distorted_img.size[1])
-                * (float(size - horizontal_margin) / float(distorted_img.size[0]))
+                float(img.size[1])
+                * (float(size - horizontal_margin) / float(img.size[0]))
             )
-            resized_img = distorted_img.resize(
+            img = img.resize(
                 (size - horizontal_margin, new_height), Image.ANTIALIAS
             )
-            resized_mask = distorted_mask.resize(
+            mask = mask.resize(
                 (size - horizontal_margin, new_height), Image.NEAREST
             )
             background_width = size
@@ -178,31 +178,34 @@ class FakeTextDataGenerator(object):
         # Place text with alignment #
         #############################
 
-        new_text_width, _ = resized_img.size
+        new_text_width, _ = img.size
 
         if alignment == 0 or width == -1:
-            background_img.paste(resized_img, (margin_left, margin_top), resized_img)
-            background_mask.paste(resized_mask, (margin_left, margin_top))
+            background_img.paste(img, (margin_left, margin_top), img)
+            background_mask.paste(mask, (margin_left, margin_top))
         elif alignment == 1:
             background_img.paste(
-                resized_img,
+                img,
                 (int(background_width / 2 - new_text_width / 2), margin_top),
-                resized_img,
+                img,
             )
             background_mask.paste(
-                resized_mask,
+                mask,
                 (int(background_width / 2 - new_text_width / 2), margin_top),
             )
         else:
             background_img.paste(
-                resized_img,
+                img,
                 (background_width - new_text_width - margin_right, margin_top),
-                resized_img,
+                img,
             )
             background_mask.paste(
-                resized_mask,
+                mask,
                 (background_width - new_text_width - margin_right, margin_top),
             )
+
+        img = background_img
+        mask = background_mask
 
         #######################
         # Apply gaussian blur #
@@ -211,15 +214,15 @@ class FakeTextDataGenerator(object):
         gaussian_filter = ImageFilter.GaussianBlur(
             radius=blur if not random_blur else rnd.randint(0, blur)
         )
-        final_image = background_img.filter(gaussian_filter)
-        final_mask = background_mask.filter(gaussian_filter)
+        img = img.filter(gaussian_filter)
+        mask = mask.filter(gaussian_filter)
         
         ############################################
         # Change image mode (RGB, grayscale, etc.) #
         ############################################
         
-        final_image = final_image.convert(image_mode)
-        final_mask = final_mask.convert(image_mode) 
+        img = img.convert(image_mode)
+        mask = mask.convert(image_mode) 
 
         #####################################
         # Generate name for resulting image #
@@ -240,10 +243,10 @@ class FakeTextDataGenerator(object):
 
         # Save the image
         if out_dir is not None:
-            final_image.save(os.path.join(out_dir, image_name))
+            img.save(os.path.join(out_dir, image_name))
             if output_mask == 1:
-                final_mask.save(os.path.join(out_dir, mask_name))
+                mask.save(os.path.join(out_dir, mask_name))
         else:
             if output_mask == 1:
-                return final_image, final_mask
-            return final_image
+                return img, mask
+            return img
