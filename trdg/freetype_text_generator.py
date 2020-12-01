@@ -2,7 +2,7 @@ import math
 import numpy as np
 from freetype import *
 from PIL import Image 
-
+from numba import jit 
 
 
 _lt_keywords = ["rotation", "shear_x", "shear_y", "scale_x", "scale_y"]
@@ -76,6 +76,14 @@ def linear_transform_parameter_formatter(rotation=0,
     e_ += scale_y * beta_ * shear_y * cos + scale_y * delta_ * cos 
     
     return a_, b_, d_, e_ 
+
+
+@jit(nopython=True)
+def _fill_data(bitmap_buffer, rows, width, pitch):
+    data = []
+    for j in range(rows):
+        data.extend(bitmap_buffer[j * pitch : j * pitch + width])
+    return data 
 
 
 def render_lt_text(text, font_file_path, transform_param=None, 
@@ -177,10 +185,8 @@ def render_lt_text(text, font_file_path, transform_param=None,
         left   = face.glyph.bitmap_left
         pen.x += kerning.x
         x = (pen.x >> 6) - xmin + left
-        y = (pen.y >> 6) - ymin - (rows - top)
-        data = []
-        for j in range(rows):
-            data.extend(bitmap.buffer[j * pitch : j * pitch + width])
+        y = (pen.y >> 6) - ymin - (rows - top) 
+        data = _fill_data(np.array(bitmap.buffer), rows, width, pitch) 
         if len(data):
             Z = np.array(data, dtype=np.ubyte).reshape(rows, width)
             L[y : y + rows, x : x + width] |= Z

@@ -188,16 +188,18 @@ It only supports .ttf for now.
 
 Number of images generated per second.
 
-- Intel Core i7-4710HQ @ 2.50Ghz + SSD (-c 1000 -w 1)
-    - `-t 1` : 363 img/s
-    - `-t 2` : 694 img/s
-    - `-t 4` : 1300 img/s
-    - `-t 8` : 1500 img/s
-- AMD Ryzen 7 1700 @ 4.0Ghz + SSD (-c 1000 -w 1)
-    - `-t 1` : 558 img/s
-    - `-t 2` : 1045 img/s
-    - `-t 4` : 2107 img/s
-    - `-t 8` : 3297 img/s
+Test command: 
+```python
+python3 run.py --count 1000 --size 32 --ensure_square_layout --image_mode L --dict alphabets/fine/basic_latin_lowercase --font_index prepare_fonts/fonts/basic_latin_lowercase
+```
+
+- 2.7 GHz Dual-Core Intel Core i5 + SSD 
+    - `--nb_processes 1` 120 img/s
+    - `--nb_processes 2` 152 img/s
+    - `--nb_processes 4` 203 img/s
+    - `--nb_processes 8` 164 img/s 
+    - `--nb_processes 16` 131 img/s 
+
 
 ## Contributing
 

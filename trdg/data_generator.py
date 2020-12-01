@@ -24,65 +24,35 @@ class FakeTextDataGenerator(object):
         cls.generate(*t)
 
     @classmethod
-    def generate(
-        cls,
-        index,
-        text,
-        font,
-        out_dir,
-        size,
-        extension,
-        skewing_angle,
-        random_skew,
-        blur,
-        random_blur,
-        background_type,
-        distorsion_type,
-        distorsion_orientation,
-        is_handwritten,
-        name_format,
-        width,
-        alignment,
-        text_color,
-        orientation,
-        space_width,
-        character_spacing,
-        margins,
-        fit,
-        output_mask,
-        word_split,
-        image_dir,
-        stroke_width=0, 
-        stroke_fill="#282828",
-        image_mode="RGB"
-    ):
+    def generate(cls, index, text, font, args):
         ensure_square_layout = True
 
-        margin_top, margin_left, margin_bottom, margin_right = margins  
+        margin_top, margin_left, margin_bottom, margin_right = args.get("margins")  
         assert margin_top >= 0, "Margins cannot be negative." 
         assert margin_left >= 0, "Margins cannot be negative." 
         assert margin_bottom >= 0, "Margins cannot be negative." 
         assert margin_right >= 0, "Margins cannot be negative." 
         assert margin_top + margin_bottom < 1, "Sum of vertical margins exceeds limit."
         assert margin_left + margin_right < 1, "Sum of horizontal margins exceeds limit."
-        if ensure_square_layout:
+        if args.get("ensure_square_layout"):
             assert margin_top + margin_bottom == margin_left + margin_right, _warning_square_layout
 
         ##########################
         # Create picture of text #
         ##########################
-        if is_handwritten:
-            if orientation == 1:
+        if args.get("handwritten"):
+            if args.get("orientation") == 1:
                 raise ValueError("Vertical handwritten text is unavailable")
-            img, mask = handwritten_text_generator.generate(text, text_color)
+            img, mask = handwritten_text_generator.generate(text, "#282828") # black 
         else:
+            transform_param = args.get("rotation")
             img, mask = freetype_text_generator.render_lt_text(text, 
                                                                font, 
-                                                               transform_param=None, 
-                                                               font_size=192, 
-                                                               font_weight=None, 
-                                                               stroke_radius=None, 
-                                                               stroke_fill=None)
+                                                               transform_param=transform_param, 
+                                                               font_size=args.get("font_size"), 
+                                                               font_weight=args.get("font_weight"), 
+                                                               stroke_radius=args.get("outline_width"), 
+                                                               stroke_fill=args.get("stroke_fill"))
 
         ##############################
         # Place transformations here #
@@ -93,6 +63,8 @@ class FakeTextDataGenerator(object):
         #############################
         # Apply distorsion to image #
         #############################
+        distorsion_type = args.get("distorsion")
+        distorsion_orientation = args.get("distorsion_orientation")
         if distorsion_type == 0:
             pass 
         elif distorsion_type == 1:
@@ -121,7 +93,7 @@ class FakeTextDataGenerator(object):
         # Resize image to desired format #
         ##################################
 
-        if ensure_square_layout:
+        if args.get("ensure_square_layout"):
             max_size = max(img.size[0], img.size[1]) 
             background_w = math.ceil(max_size / (1 - margin_left - margin_right))
             background_h = math.ceil(max_size / (1 - margin_top - margin_bottom)) 
@@ -139,22 +111,20 @@ class FakeTextDataGenerator(object):
         img = background 
         mask = background_mask 
 
-        final_h = size 
+        final_h = args.get("size") 
         if ensure_square_layout:
-            final_w = size
+            final_w = args.get("size")
         else:
             final_w = math.ceil(final_h * img.size[0] / img.size[1])
-        img = img.resize((final_w, final_h), resample=Image.LANCZOS, reducing_gap=4)
+
+        img = img.resize((final_w, final_h), resample=Image.LANCZOS, reducing_gap=4) 
         mask = mask.resize((final_w, final_h), resample=Image.LANCZOS, reducing_gap=4)
 
-        # make mask binary (255 or 0)
-        mask = np.array(mask)
-        mask[mask != 0] = 255
-        mask = Image.fromarray(mask)
-
+        
         #############################
         # Generate background image #
         #############################
+        background_type = args.get("background")
         if background_type == 0:
             background_img = background_generator.gaussian_noise(final_h, final_w)
         elif background_type == 1:
@@ -162,7 +132,7 @@ class FakeTextDataGenerator(object):
         elif background_type == 2:
             background_img = background_generator.quasicrystal(final_h, final_w)
         else:
-            background_img = background_generator.image(final_h, final_w, image_dir)
+            background_img = background_generator.image(final_h, final_w, args.get("image_dir"))
 
         background_img.paste(img, (0, 0), mask)
         img = background_img
@@ -171,9 +141,10 @@ class FakeTextDataGenerator(object):
         # Apply gaussian blur #
         #######################
 
-        gaussian_filter = ImageFilter.GaussianBlur(
-            radius=blur if not random_blur else rnd.randint(0, blur)
-        )
+        blur = args.get("blur")
+        if args.get("random_blur"):
+            blur = rnd.randint(0, blur)
+        gaussian_filter = ImageFilter.GaussianBlur(radius=blur)
         img = img.filter(gaussian_filter)
         mask = mask.filter(gaussian_filter)
         
@@ -181,11 +152,13 @@ class FakeTextDataGenerator(object):
         # Change image mode (RGB, grayscale, etc.) #
         ############################################
         
-        img = img.convert(image_mode) 
+        img = img.convert(args.get("image_mode")) 
 
         #####################################
         # Generate name for resulting image #
         #####################################
+        name_format = args.get("name_format")
+        extension = args.get("extension")
         if name_format == 0:
             image_name = "{}_{}.{}".format(text, str(index), extension)
             mask_name = "{}_{}_mask.png".format(text, str(index))
@@ -201,6 +174,8 @@ class FakeTextDataGenerator(object):
             mask_name = "{}_{}_mask.png".format(text, str(index))
 
         # Save the image
+        out_dir = args.get("output_dir")
+        output_mask = args.get("output_mask")
         if out_dir is not None:
             img.save(os.path.join(out_dir, image_name))
             if output_mask == 1:
