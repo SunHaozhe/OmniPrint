@@ -15,7 +15,7 @@ python3 download_fonts.py
 python3 build_font_directory.py -d ../alphabets/fine
 ```
 
-On the tested machine, the script `download_fonts.py` took about 20 minutes, the script `font_directory.py` took about 65 minutes. In total, the expected executation time ranges from 70 minutes to 90 minutes. The execution time of the first command partly depends on internet connection. 
+On the tested machine, the script `download_fonts.py` took about 20 minutes, the script `build_font_directory.py` took about 65 minutes. In total, the expected executation time ranges from 70 minutes to 90 minutes. The execution time of the first command partly depends on internet connection. 
 
 The script `download_fonts.py` not only downloads the fonts from the predefined URL list, it also does some cleaning and formatting. Some metadata will also be generated to keep track of the sources of each font. 
 

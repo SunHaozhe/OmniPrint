@@ -164,35 +164,18 @@ def test_pil_compatibility(font_file_path, text_):
 			return True  
 
 
-def test_freetype_compatibility(font_file_path, text_):
+def test_freetype_compatibility(face, text_):
+	"""
+	This is the simplified version of test_freetype_compatibility, 
+	the complete verification consumes way too much time. 
+	"""
 	try:
-		face = Face(font_file_path) 
-		face.set_char_size(12288) 
 		face.load_char(text_)
-		bitmap = face.glyph.bitmap 
-		bitmap = face.glyph.bitmap
-		width  = face.glyph.bitmap.width
-		rows   = face.glyph.bitmap.rows
-		pitch  = face.glyph.bitmap.pitch
-		img = []
-		for i in range(rows):
-			img.extend(bitmap.buffer[i * pitch : i * pitch + width])
-		img = np.array(img, dtype=np.ubyte).reshape(rows, width)
-		img = Image.fromarray(np.invert(img))
 	except Exception as e:
 		return False
 	else:
-		# test whether img is falsely blank/constant 
-		arr = np.array(img)
-		first_element = arr[0, 0]
-		if np.all(arr == first_element):
-			if ord(text_) == 32: # 32 is the space character
-				return True
-			else:
-				return False 
-		else:
-			return True 
-
+		return True 
+	
 
 # problematic font files 
 _hard_coded_black_list = ['albayan', 'baghdad', 'capture_it_2', 'courier new', 'gurumaa-2.04', 
@@ -253,11 +236,16 @@ def filter_fonts(font_paths, text_set_file_path, extensions=[".ttf", ".otf"], ve
 		# 2. double check with Pillow library 
 		# 3. double check with freetype library 
 		flag = True 
+		try:
+			face = Face(font_path) 
+			face.set_char_size(12288) 
+		except Exception:
+			flag = False 
 		for char_ in chars:
 			for ttfont in ttfonts:
 				flag = flag and ttf_supports_char(ttfont, char_)
 			flag = flag and test_pil_compatibility(font_path, char_) 
-			flag = flag and test_freetype_compatibility(font_path, char_)
+			flag = flag and test_freetype_compatibility(face, char_)
 		if flag:
 			filtered_font_paths.append(font_path)
 	return sorted(list(set(filtered_font_paths))) 

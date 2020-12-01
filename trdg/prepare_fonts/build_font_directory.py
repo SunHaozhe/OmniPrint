@@ -129,6 +129,16 @@ generate_variable_weight_font_index(target_directory)
 # build available_fonts.csv which consists of useful metadata
 count_available_fonts(target_directory, args.metadata_dir_name)
 
+# move metadata files to the dedicated directory
+files_to_move = ["log_download.csv", "cjk_file_name_table.csv", 
+				 "font2url_id.pkl", "url_id2font.pkl"] 
+metadata_dir = os.path.join(target_directory, args.metadata_dir_name)
+if not os.path.exists(metadata_dir):
+	os.makedirs(metadata_dir) 
+for file_ in files_to_move:
+	shutil.copy(file_, metadata_dir)
+	os.remove(file_)
+
 if not args.keep_temporary_directory:
 	shutil.rmtree(tmp_save_dir) 
 
