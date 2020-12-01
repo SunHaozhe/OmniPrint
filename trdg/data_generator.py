@@ -1,5 +1,5 @@
 import os
-import random as rnd
+import random 
 import math 
 import numpy as np 
 
@@ -13,8 +13,14 @@ try:
 except ImportError as e:
     print("Missing modules for handwritten text generation.")
 
+_high_level_lt_params = ["rotation", "shear_x", "shear_y", "scale_x", 
+                         "scale_y", "alpha", "beta", "gamma", "delta"]
+_random_high_level_lt_params = ["random_rotation", "random_shear_x", "random_shear_y", 
+                                "random_scale_x", "random_scale_y", "random_alpha", 
+                                "random_beta", "random_gamma", "random_delta"]
 
-class FakeTextDataGenerator(object):
+
+class TextDataGenerator(object):
     @classmethod
     def generate_from_tuple(cls, t):
         """
@@ -25,7 +31,9 @@ class FakeTextDataGenerator(object):
 
     @classmethod
     def generate(cls, index, text, font, args):
-        ensure_square_layout = True
+        if args.get("random_seed") is not None:
+            random.seed(3 * args.random_seed + 2 + 2 * index)
+            np.random.seed(4 * args.random_seed + 3 + 3 * index)
 
         margin_top, margin_left, margin_bottom, margin_right = args.get("margins")  
         assert margin_top >= 0, "Margins cannot be negative." 
@@ -45,7 +53,21 @@ class FakeTextDataGenerator(object):
                 raise ValueError("Vertical handwritten text is unavailable")
             img, mask = handwritten_text_generator.generate(text, "#282828") # black 
         else:
-            transform_param = args.get("rotation")
+            transform_param = {}
+            if args.get("linear_transform") is not None:
+                transform_param = args.get("linear_transform") 
+            else:
+                for lt_param_ in _high_level_lt_params:
+                    if args.get(lt_param_) is not None:
+                        transform_param[lt_param_] = args.get(lt_param_) 
+                for random_lt_param_ in _random_high_level_lt_params:
+                    if args.get(random_lt_param_):
+                        lt_param_ = random_lt_param_[7:] 
+                        limit_value = args.get(lt_param_) 
+                        assert limit_value is not None, "The range of parameter is required."
+                        limit_value = abs(limit_value)
+                        sampled_value = random.uniform(- limit_value, limit_value) 
+                        transform_param[lt_param_] = sampled_value 
             img, mask = freetype_text_generator.render_lt_text(text, 
                                                                font, 
                                                                transform_param=transform_param, 
@@ -104,6 +126,10 @@ class FakeTextDataGenerator(object):
             background_h = math.ceil(img.size[1] / (1 - margin_top - margin_bottom)) 
             offset_x = math.floor(background_w * margin_left)
             offset_y = math.floor(background_h * margin_top)
+        if args.get("random_translation_x"):
+            offset_x = random.randint(0, math.ceil(background_w - img.size[0]))
+        if args.get("random_translation_y"):
+            offset_y = random.randint(0, math.ceil(background_h - img.size[1]))
         background = Image.new("RGB", (background_w, background_h), (255, 255, 255))    
         background.paste(img, (offset_x, offset_y), mask)
         background_mask = Image.new("L", (background_w, background_h), 0)    
@@ -112,7 +138,7 @@ class FakeTextDataGenerator(object):
         mask = background_mask 
 
         final_h = args.get("size") 
-        if ensure_square_layout:
+        if args.get("ensure_square_layout"):
             final_w = args.get("size")
         else:
             final_w = math.ceil(final_h * img.size[0] / img.size[1])
@@ -143,7 +169,7 @@ class FakeTextDataGenerator(object):
 
         blur = args.get("blur")
         if args.get("random_blur"):
-            blur = rnd.randint(0, blur)
+            blur = random.randint(0, blur)
         gaussian_filter = ImageFilter.GaussianBlur(radius=blur)
         img = img.filter(gaussian_filter)
         mask = mask.filter(gaussian_filter)

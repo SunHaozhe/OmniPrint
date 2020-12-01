@@ -5,7 +5,7 @@ import glob
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-import random as rnd
+import random 
 import string
 import sys
 import numpy as np 
@@ -18,7 +18,7 @@ from trdg.string_generator import (
 	create_strings_randomly,
 )
 from trdg.utils import load_dict, load_fonts, add_txt_extension
-from trdg.data_generator import FakeTextDataGenerator
+from trdg.data_generator import TextDataGenerator
 import multiprocessing
 
 
@@ -26,7 +26,7 @@ def parse_margins(x):
 	x = x.split(",")
 	if len(x) == 1:
 		return [float(x[0])] * 4
-	return [float(m) for m in x]
+	return [float(el) for el in x]
 
 def parse_color(x):
 	x = x.split(",")
@@ -38,7 +38,14 @@ def parse_affine_perspective_transformations(x):
 	x = x.split(",")
 	if len(x) == 1:
 		return [float(x[0])] * 6
-	return [float(m) for m in x]
+	return [float(el) for el in x]
+
+def parse_linear_transform(x):
+	x = x.split(",")
+	if len(x) in [4, 5, 9]:
+		return [float(el) for el in x]
+	else:
+		raise Exception("The length of --linear_transform must be 4, 5 or 9.")
 
 
 def parse_arguments():
@@ -126,11 +133,12 @@ def parse_arguments():
 		default=32,
 	)
 	parser.add_argument(
-		"-nbp",
+		"-p",
 		"--nb_processes",
 		type=int,
 		nargs="?",
-		help="Define the number of processes to use for image generation. If not provided, this equals to the number of CPU cores",
+		help="Define the number of processes to use for image generation. " +\
+		"If not provided, this equals to the number of CPU cores", 
 		default=None,
 	)
 	parser.add_argument(
@@ -140,21 +148,6 @@ def parse_arguments():
 		nargs="?",
 		help="Define the extension to save the image with",
 		default="png",
-	)
-	parser.add_argument(
-		"-rtn",
-		"--rotation",
-		type=float,
-		nargs="?",
-		help="Define rotation angle (in degree) of the generated text. In positive degrees",
-		default=0,
-	)
-	parser.add_argument(
-		"-rrtn",
-		"--random_rotation",
-		action="store_true",
-		help="When set, the rotation angle will be randomized between the value set with -rtn and it's opposite",
-		default=False,
 	)
 	parser.add_argument(
 		"-wk",
@@ -317,6 +310,189 @@ def parse_arguments():
 		help="Font size in point",
 		default=192,
 	)
+	parser.add_argument(
+		"-lt",
+		"--linear_transform",
+		type=parse_linear_transform,
+		nargs="?",
+		help="The parameter for linear transform. The length must be 4, 5 or 9. " +\
+		"Length 4 corresponds low level parameterization, which means a, b, d, e, this " +\
+		"is the most customizable parameterization. Length 5 and length 9 correspond to " +\
+		"high level parameterization. Length 5 means rotation, shear_x, shear_y, " +\
+		"scale_x, scale_y. Length 9 means rotation, shear_x, shear_y, " +\
+		"scale_x, scale_y, alpha_, beta_, gamma_, delta_. If this parameter is set, " +\
+		"other linear transform parameters like rotation, shear_x, etc. will be ignored",
+		default=None,
+	)
+	parser.add_argument(
+		"-rtn",
+		"--rotation",
+		type=float,
+		nargs="?",
+		help="Define rotation angle (in degree) of the generated text. " +\
+		"Used only when --linear_transform is not set",
+		default=0,
+	)
+	parser.add_argument(
+		"-rrtn",
+		"--random_rotation",
+		action="store_true",
+		help="Uniformly sample the value of rotation, the parameter --rotation needs to be set. " +\
+		"The range is [-abs(rotation), abs(rotation)]", 
+		default=False,
+	)
+	parser.add_argument(
+		"-shrx",
+		"--shear_x",
+		type=float,
+		nargs="?",
+		help="High level linear transform parameter, horizontal shear. " +\
+		"Used only when --linear_transform is not set",
+		default=None,
+	)
+	parser.add_argument(
+		"-rshrx",
+		"--random_shear_x",
+		action="store_true",
+		help="Uniformly sample the value of shear_x, the parameter --shear_x needs to be set. " +\
+		"The range is [-abs(shear_x), abs(shear_x)]", 
+		default=False,
+	)
+	parser.add_argument(
+		"-shry",
+		"--shear_y",
+		type=float,
+		nargs="?",
+		help="High level linear transform parameter, vertical shear. " +\
+		"Used only when --linear_transform is not set",
+		default=None,
+	)
+	parser.add_argument(
+		"-rshry",
+		"--random_shear_y",
+		action="store_true",
+		help="Uniformly sample the value of shear_y, the parameter --shear_y needs to be set. " +\
+		"The range is [-abs(shear_y), abs(shear_y)]", 
+		default=False,
+	)
+	parser.add_argument(
+		"-sclx",
+		"--scale_x",
+		type=float,
+		nargs="?",
+		help="High level linear transform parameter, horizontal scale. " +\
+		"Used only when --linear_transform is not set",
+		default=None,
+	)
+	parser.add_argument(
+		"-rsclx",
+		"--random_scale_x",
+		action="store_true",
+		help="Uniformly sample the value of scale_x, the parameter --scale_x needs to be set. " +\
+		"The range is [-abs(scale_x), abs(scale_x)]", 
+		default=False,
+	)
+	parser.add_argument(
+		"-scly",
+		"--scale_y",
+		type=float,
+		nargs="?",
+		help="High level linear transform parameter, vertical scale. " +\
+		"Used only when --linear_transform is not set",
+		default=None,
+	)
+	parser.add_argument(
+		"-rscly",
+		"--random_scale_y",
+		action="store_true",
+		help="Uniformly sample the value of scale_y, the parameter --scale_y needs to be set. " +\
+		"The range is [-abs(scale_y), abs(scale_y)]", 
+		default=False,
+	)
+	parser.add_argument(
+		"-alpha",
+		"--alpha",
+		type=float,
+		nargs="?",
+		help="Customizable high level linear transform parameter, top left element in the 2x2 matrix. " +\
+		"Used only when --linear_transform is not set",
+		default=None,
+	)
+	parser.add_argument(
+		"-ralpha",
+		"--random_alpha",
+		action="store_true",
+		help="Uniformly sample the value of alpha, the parameter --alpha needs to be set. " +\
+		"The range is [-abs(alpha), abs(alpha)]", 
+		default=False,
+	)
+	parser.add_argument(
+		"-beta",
+		"--beta",
+		type=float,
+		nargs="?",
+		help="Customizable high level linear transform parameter, top right element in the 2x2 matrix. " +\
+		"Used only when --linear_transform is not set",
+		default=None,
+	)
+	parser.add_argument(
+		"-rbeta",
+		"--random_beta",
+		action="store_true",
+		help="Uniformly sample the value of beta, the parameter --beta needs to be set. " +\
+		"The range is [-abs(beta), abs(beta)]", 
+		default=False,
+	)
+	parser.add_argument(
+		"-gamma",
+		"--gamma",
+		type=float,
+		nargs="?",
+		help="Customizable high level linear transform parameter, bottom left element in the 2x2 matrix. " +\
+		"Used only when --linear_transform is not set",
+		default=None,
+	)
+	parser.add_argument(
+		"-rgamma",
+		"--random_gamma",
+		action="store_true",
+		help="Uniformly sample the value of gamma, the parameter --gamma needs to be set. " +\
+		"The range is [-abs(gamma), abs(gamma)]", 
+		default=False,
+	)
+	parser.add_argument(
+		"-delta",
+		"--delta",
+		type=float,
+		nargs="?",
+		help="Customizable high level linear transform parameter, bottom right element in the 2x2 matrix. " +\
+		"Used only when --linear_transform is not set",
+		default=None,
+	)
+	parser.add_argument(
+		"-rdelta",
+		"--random_delta",
+		action="store_true",
+		help="Uniformly sample the value of delta, the parameter --delta needs to be set. " +\
+		"The range is [-abs(delta), abs(delta)]", 
+		default=False,
+	)
+	parser.add_argument(
+		"-rtslnx",
+		"--random_translation_x",
+		action="store_true",
+		help="Uniformly sample the value of horizontal translation. " +\
+		"This will have no effect if horizontal margins are 0", 
+		default=False,
+	)
+	parser.add_argument(
+		"-rtslny",
+		"--random_translation_y",
+		action="store_true",
+		help="Uniformly sample the value of vertical translation. " +\
+		"This will have no effect if vertical margins are 0", 
+		default=False,
+	)
 	return parser.parse_args()
 
 
@@ -329,7 +505,7 @@ def main():
 	args = parse_arguments()
 
 	if args.random_seed is not None:
-		rnd.seed(args.random_seed)
+		random.seed(args.random_seed)
 		np.random.seed(2 * args.random_seed + 1)
 
 	# Create the directory if it does not exist.
@@ -420,15 +596,15 @@ def main():
 
 	string_count = len(strings)
 
-	sampled_fonts = [fonts[rnd.randrange(0, len(fonts))] for _ in range(0, string_count)]
+	sampled_fonts = [fonts[random.randrange(0, len(fonts))] for _ in range(0, string_count)]
 
 	nb_processes = args.nb_processes
 	if nb_processes is None:
 		nb_processes = multiprocessing.cpu_count() 
 	print("Using {} processes.".format(nb_processes))
-	
+
 	with multiprocessing.Pool(nb_processes) as pool:
-		imap_it = list(tqdm.tqdm(pool.imap_unordered(FakeTextDataGenerator.generate_from_tuple, 
+		imap_it = list(tqdm.tqdm(pool.imap_unordered(TextDataGenerator.generate_from_tuple, 
 													 zip([i for i in range(0, string_count)], 
 														strings, 
 														sampled_fonts, 
