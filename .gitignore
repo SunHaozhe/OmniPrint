@@ -102,14 +102,18 @@ ENV/
 
 .vscode/*
 
+# MacOS
+
+.DS_Store
+
 # fonts, results and some generated metadata
-trdg/out/
-trdg/fonts/
-trdg/prepare_fonts/font2url_id.pkl
-trdg/prepare_fonts/url_id2font.pkl
-trdg/prepare_fonts/log_download.csv
-trdg/prepare_fonts/cjk_file_name_table.csv
-trdg/prepare_fonts/fonts/
-trdg/prepare_fonts/temporary_save_directory
-trdg/prepare_fonts/*.tmp
-trdg/quick_run.py
+omniprint/out/
+omniprint/fonts/
+omniprint/prepare_fonts/font2url_id.pkl
+omniprint/prepare_fonts/url_id2font.pkl
+omniprint/prepare_fonts/log_download.csv
+omniprint/prepare_fonts/cjk_file_name_table.csv
+omniprint/prepare_fonts/fonts/
+omniprint/prepare_fonts/temporary_save_directory
+omniprint/prepare_fonts/*.tmp
+omniprint/quick_run.py
