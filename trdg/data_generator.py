@@ -7,6 +7,7 @@ import PIL
 from PIL import Image, ImageFilter
 
 from trdg import freetype_text_generator, background_generator, distorsion_generator
+import transforms
 
 try:
     from trdg import handwritten_text_generator
@@ -32,8 +33,8 @@ class TextDataGenerator(object):
     @classmethod
     def generate(cls, index, text, font, args):
         if args.get("random_seed") is not None:
-            random.seed(3 * args.random_seed + 2 + 2 * index)
-            np.random.seed(4 * args.random_seed + 3 + 3 * index)
+            random.seed(3 * args.get("random_seed") + 2 + 2 * index)
+            np.random.seed(4 * args.get("random_seed") + 3 + 3 * index)
 
         margin_top, margin_left, margin_bottom, margin_right = args.get("margins")  
         assert margin_top >= 0, "Margins cannot be negative." 
@@ -81,6 +82,19 @@ class TextDataGenerator(object):
         ##############################
 
 
+        # perspective/projective transformation 
+        if args.get("random_perspective_transform") is not None:
+            img, mask = transforms.perspective_transform(img, 
+                                                         mask, 
+                                                         quadrilateral=None, 
+                                                         gaussian_std=args.get("random_perspective_transform"))
+        elif args.get("perspective_transform") is not None:
+            perspective_transform = np.asarray(args.get("perspective_transform")).reshape((4, 2))
+            img, mask = transforms.perspective_transform(img, 
+                                                         mask, 
+                                                         quadrilateral=perspective_transform, 
+                                                         gaussian_std=None)
+
 
         #############################
         # Apply distorsion to image #
@@ -127,15 +141,16 @@ class TextDataGenerator(object):
             offset_x = math.floor(background_w * margin_left)
             offset_y = math.floor(background_h * margin_top)
         if args.get("random_translation_x"):
-            offset_x = random.randint(0, math.ceil(background_w - img.size[0]))
+            offset_x = random.randint(0, math.floor(background_w - img.size[0]))
         if args.get("random_translation_y"):
-            offset_y = random.randint(0, math.ceil(background_h - img.size[1]))
+            offset_y = random.randint(0, math.floor(background_h - img.size[1]))
         background = Image.new("RGB", (background_w, background_h), (255, 255, 255))    
         background.paste(img, (offset_x, offset_y), mask)
         background_mask = Image.new("L", (background_w, background_h), 0)    
         background_mask.paste(mask, (offset_x, offset_y), mask)
         img = background 
         mask = background_mask 
+        
 
         final_h = args.get("size") 
         if args.get("ensure_square_layout"):
@@ -145,6 +160,7 @@ class TextDataGenerator(object):
 
         img = img.resize((final_w, final_h), resample=Image.LANCZOS, reducing_gap=4) 
         mask = mask.resize((final_w, final_h), resample=Image.LANCZOS, reducing_gap=4)
+        
 
         
         #############################

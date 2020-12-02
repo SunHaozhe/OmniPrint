@@ -22,11 +22,13 @@ from trdg.data_generator import TextDataGenerator
 import multiprocessing
 
 
+
 def parse_margins(x):
 	x = x.split(",")
 	if len(x) == 1:
 		return [float(x[0])] * 4
 	return [float(el) for el in x]
+
 
 def parse_color(x):
 	x = x.split(",")
@@ -34,11 +36,13 @@ def parse_color(x):
 		return [int(x[0])] * 3
 	return [int(el) for el in x]
 
+
 def parse_affine_perspective_transformations(x):
 	x = x.split(",")
 	if len(x) == 1:
 		return [float(x[0])] * 6
 	return [float(el) for el in x]
+
 
 def parse_linear_transform(x):
 	x = x.split(",")
@@ -46,6 +50,14 @@ def parse_linear_transform(x):
 		return [float(el) for el in x]
 	else:
 		raise Exception("The length of --linear_transform must be 4, 5 or 9.")
+
+
+def parse_perspective_transform(x):
+	x = x.split(",")
+	if len(x) == 8:
+		return [float(el) for el in x]
+	else:
+		raise Exception("The length of --perspective_transform must be 8.")
 
 
 def parse_arguments():
@@ -492,6 +504,42 @@ def parse_arguments():
 		help="Uniformly sample the value of vertical translation. " +\
 		"This will have no effect if vertical margins are 0", 
 		default=False,
+	)
+	parser.add_argument(
+		"-pt",
+		"--perspective_transform",
+		type=parse_perspective_transform,
+		nargs="?",
+		help="Given the coordinates of the four corners of the first quadrilateral " +\
+    	"and the coordinates of the four corners of the second quadrilateral, " +\
+    	"perform the perspective transform that maps a new point in the first " +\
+    	"quadrilateral onto the appropriate position on the second quadrilateral. " +\
+		"Perspective transformation simulates different angle of view. " +\
+		"Enter 8 real numbers (float) which correspond to the 4 corner points (2D coordinates) " +\
+		"of the target quadrilateral, these 4 corner points which be respectively " +\
+		"mapped to [[0, 0], [1, 0], [0, 1], [1, 1]] in the source quadrilateral. " +\
+		"[0, 0] is the top left corner, [1, 0] is the top left corner, [0, 1] is " +\
+		"the bottom left corner, [1, 1] is the bottom right corner." +\
+		"These coordinates have been normalized to unit square [0, 1]^2. Thus, " +\
+		"the entered corner points should match the order of magnitude and must be convex. " +\
+		"For example, 0,0,1,0,0,1,1,1 will produce identity transform. " +\
+		"This option will have no effect if --random_perspective_transform is set. " +\
+		"This option sometimes will cut off the periphery of the text, causing noisy " +\
+		"data. ",
+		default=None
+	)
+	parser.add_argument(
+		"-rpt",
+		"--random_perspective_transform",
+		type=float,
+		nargs="?",
+		help="Randomly generate a convex quadrilateral which will be mapped to the normalized unit square, " +\
+		"the value of each axis is independently sampled from the gaussian distribution, " +\
+		"the standard deviation of the gaussian distribution is given by --random_perspective_transform. " +\
+		"If this option is present but not followed by a command-line argument, the standard deviation " +\
+		"0.05 will be used by default. ",
+		default=None,
+		const=0.05
 	)
 	return parser.parse_args()
 
