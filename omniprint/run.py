@@ -11,14 +11,14 @@ import sys
 import numpy as np 
 
 import tqdm
-from trdg.string_generator import (
+from omniprint.string_generator import (
 	create_strings_from_dict,
 	create_strings_from_file,
 	create_strings_from_wikipedia,
 	create_strings_randomly,
 )
-from trdg.utils import load_dict, load_fonts, add_txt_extension
-from trdg.data_generator import TextDataGenerator
+from omniprint.utils import load_dict, load_fonts, add_txt_extension
+from omniprint.data_generator import TextDataGenerator
 import multiprocessing
 
 

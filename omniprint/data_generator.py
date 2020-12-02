@@ -6,11 +6,11 @@ import numpy as np
 import PIL
 from PIL import Image, ImageFilter
 
-from trdg import freetype_text_generator, background_generator, distorsion_generator
+from omniprint import freetype_text_generator, background_generator, distorsion_generator
 import transforms
 
 try:
-    from trdg import handwritten_text_generator
+    from omniprint import handwritten_text_generator
 except ImportError as e:
     print("Missing modules for handwritten text generation.")
 

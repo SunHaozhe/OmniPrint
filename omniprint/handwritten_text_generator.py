@@ -31,7 +31,7 @@ def download_model_weights():
             continue
         print(f"file {k} not found, downloading from git repo..")
         urllib.request.urlretrieve(
-            f"https://raw.github.com/Belval/TextRecognitionDataGenerator/master/trdg/handwritten_model/{k}",
+            f"https://raw.github.com/Belval/TextRecognitionDataGenerator/master/omniprint/handwritten_model/{k}",
             download_dir / f"{k}",
         )
         print(f"file {k} saved to disk")
