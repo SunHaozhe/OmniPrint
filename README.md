@@ -1,4 +1,5 @@
-# TextRecognitionDataGenerator [![TravisCI](https://travis-ci.org/Belval/TextRecognitionDataGenerator.svg?branch=master)](https://travis-ci.org/Belval/TextRecognitionDataGenerator) [![PyPI version](https://badge.fury.io/py/trdg.svg)](https://badge.fury.io/py/trdg) [![codecov](https://codecov.io/gh/Belval/TextRecognitionDataGenerator/branch/master/graph/badge.svg)](https://codecov.io/gh/Belval/TextRecognitionDataGenerator) [![Documentation Status](https://readthedocs.org/projects/textrecognitiondatagenerator/badge/?version=latest)](https://textrecognitiondatagenerator.readthedocs.io/en/latest/?badge=latest) [![mattermost](https://img.shields.io/badge/help-mattermost-blue)](https://mattermost.belval.org/signup_user_complete/?id=6j1pj6itd7y4781o1u813796ry)
+# OmniPrint 
+
 
 A synthetic data generator for text recognition
 
@@ -8,13 +9,7 @@ Generating text image samples to train an OCR software. Now supporting non-latin
 
 ## What do I need to make it work?
 
-Install the pypi package
 
-```
-pip install trdg
-```
-
-Afterwards, you can use `trdg` from the CLI. I recommend using a virtualenv instead of installing with `sudo`.
 
 If you want to add another language, you can clone the repository instead. Simply run `pip install -r requirements.txt`
 
@@ -281,7 +276,7 @@ Words will be randomly chosen from a dictionary of a specific language. Then an 
 The usage as a Python module is very similar to the CLI, but it is more flexible if you want to include it directly in your training pipeline, and will consume less space and memory. There are 4 generators that can be used.
 
 ```py
-from trdg.generators import (
+from omniprint.generators import (
     GeneratorFromDict,
     GeneratorFromRandom,
     GeneratorFromStrings,
@@ -299,16 +294,11 @@ for img, lbl in generator:
     # Do something with the pillow images here.
 ```
 
-You can see the full class definition here:
 
-- [`GeneratorFromDict`](trdg/generators/from_dict.py)
-- [`GeneratorFromRandom`](trdg/generators/from_random.py)
-- [`GeneratorFromStrings`](trdg/generators/from_strings.py)
-- [`GeneratorFromWikipedia`](trdg/generators/from_wikipedia.py)
 
 ### Basic (CLI)
 
-`trdg -c 1000 --size 64`
+`python3 run.py -c 1000 --size 64`
 
 You get 1000 randomly generated images with random text on them like:
 
@@ -317,7 +307,7 @@ By default, they will be generated to `out/` in the current working directory.
 
 ### Text rotation
 
-What if you want random rotation? Add `-rtn` and `-rrtn` (`trdg -c 1000 --size 64 -rtn 5 -rrtn`)
+What if you want random rotation? Add `-rtn` and `-rrtn` (`python3 run.py -c 1000 --size 64 -rtn 5 -rrtn`)
 
 
 ### Text distortion
