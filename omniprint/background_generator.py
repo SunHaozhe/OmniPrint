@@ -18,7 +18,7 @@ def gaussian_noise(height, width):
     # We add gaussian noise
     cv2.randn(image, 235, 10)
 
-    return Image.fromarray(image).convert("RGBA")
+    return Image.fromarray(image).convert("RGB")
 
 
 def plain_white(height, width):
@@ -26,7 +26,7 @@ def plain_white(height, width):
         Create a plain white background
     """
 
-    return Image.new("L", (width, height), 255).convert("RGBA")
+    return Image.new("L", (width, height), 255).convert("RGB")
 
 
 def quasicrystal(height, width):
@@ -52,7 +52,7 @@ def quasicrystal(height, width):
                 z += math.cos(r * math.sin(a) * frequency + phase)
             c = int(255 - round(255 * z / rotation_count))
             pixels[kw, kh] = c  # grayscale
-    return image.convert("RGBA")
+    return image.convert("RGB")
 
 
 def image(height, width, image_dir):

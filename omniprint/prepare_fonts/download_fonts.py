@@ -180,7 +180,7 @@ for i, flag in enumerate(flags):
 				font2url_id[os.path.basename(path)].append(i) 
 				url_id2font[i].append(os.path.basename(path))
 cjk_file_names_df = pd.DataFrame(cjk_file_names_df, columns=["URL_id", "original_name", 
-															 "pinyin_name", "directory"])
+															 "font_file", "directory"])
 cjk_file_names_df.to_csv("cjk_file_name_table.csv", sep="\t", encoding="utf-8")
 
 

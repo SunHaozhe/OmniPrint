@@ -28,10 +28,13 @@ class TextDataGenerator(object):
             Same as generate, but takes all parameters as one tuple
         """
 
-        cls.generate(*t)
+        return cls.generate(*t)
 
     @classmethod
-    def generate(cls, index, text, font, args):
+    def generate(cls, index, text, font_file_path, args, returns_img=True):
+        # dictionary to store all kinds of labels 
+        label = {}
+
         if args.get("random_seed") is not None:
             random.seed(3 * args.get("random_seed") + 2 + 2 * index)
             np.random.seed(4 * args.get("random_seed") + 3 + 3 * index)
@@ -46,9 +49,16 @@ class TextDataGenerator(object):
         if args.get("ensure_square_layout"):
             assert margin_top + margin_bottom == margin_left + margin_right, _warning_square_layout
 
+        # collect labels
+        label["text"] = text
+        if len(text) == 1:
+            label["unicode_code_point"] = ord(text)
+        label["font_file"] = os.path.basename(font_file_path)
+
         ##########################
         # Create picture of text #
         ##########################
+
         if args.get("handwritten"):
             if args.get("orientation") == 1:
                 raise ValueError("Vertical handwritten text is unavailable")
@@ -57,6 +67,7 @@ class TextDataGenerator(object):
             transform_param = {}
             if args.get("linear_transform") is not None:
                 transform_param = args.get("linear_transform") 
+                label["linear_transform"] = transform_param 
             else:
                 for lt_param_ in _high_level_lt_params:
                     if args.get(lt_param_) is not None:
@@ -66,16 +77,26 @@ class TextDataGenerator(object):
                         lt_param_ = random_lt_param_[7:] 
                         limit_value = args.get(lt_param_) 
                         assert limit_value is not None, "The range of parameter is required."
-                        limit_value = abs(limit_value)
-                        sampled_value = random.uniform(- limit_value, limit_value) 
-                        transform_param[lt_param_] = sampled_value 
+                        limit_value = abs(limit_value) 
+                        transform_param[lt_param_] = random.uniform(- limit_value, limit_value) 
+
+                # collect labels
+                for lt_param_ in _high_level_lt_params:
+                    if args.get(lt_param_) is not None:
+                        label[lt_param_] = transform_param[lt_param_] 
+
             img, mask = freetype_text_generator.render_lt_text(text, 
-                                                               font, 
+                                                               font_file_path, 
                                                                transform_param=transform_param, 
                                                                font_size=args.get("font_size"), 
                                                                font_weight=args.get("font_weight"), 
                                                                stroke_radius=args.get("outline_width"), 
                                                                stroke_fill=args.get("stroke_fill"))
+            # collect labels
+            for x in ["font_weight", "stroke_fill"]:
+                if args.get(x) is not None:
+                    label[x] = args.get(x)
+
 
         ##############################
         # Place transformations here #
@@ -84,16 +105,20 @@ class TextDataGenerator(object):
 
         # perspective/projective transformation 
         if args.get("random_perspective_transform") is not None:
-            img, mask = transforms.perspective_transform(img, 
-                                                         mask, 
+            img, mask, perspective_params = transforms.perspective_transform(img, mask, 
                                                          quadrilateral=None, 
-                                                         gaussian_std=args.get("random_perspective_transform"))
+                                                         gaussian_std=args.get("random_perspective_transform"),
+                                                         return_perspective_params=True)
+            # collect labels
+            label["perspective_params"] = perspective_params 
         elif args.get("perspective_transform") is not None:
             perspective_transform = np.asarray(args.get("perspective_transform")).reshape((4, 2))
-            img, mask = transforms.perspective_transform(img, 
-                                                         mask, 
+            img, mask, perspective_params = transforms.perspective_transform(img, mask, 
                                                          quadrilateral=perspective_transform, 
-                                                         gaussian_std=None)
+                                                         gaussian_std=None,
+                                                         return_perspective_params=True)
+            # collect labels
+            label["perspective_params"] = perspective_params 
 
 
         #############################
@@ -150,6 +175,10 @@ class TextDataGenerator(object):
         background_mask.paste(mask, (offset_x, offset_y), mask)
         img = background 
         mask = background_mask 
+
+        # collect labels
+        label["offset_horizontal"] = offset_x
+        label["offset_vertical"] = offset_y
         
 
         final_h = args.get("size") 
@@ -161,7 +190,9 @@ class TextDataGenerator(object):
         img = img.resize((final_w, final_h), resample=Image.LANCZOS, reducing_gap=4) 
         mask = mask.resize((final_w, final_h), resample=Image.LANCZOS, reducing_gap=4)
         
-
+        # collect labels
+        label["image_width_resolution"] = final_w
+        label["image_height_resolution"] = final_h
         
         #############################
         # Generate background image #
@@ -184,11 +215,17 @@ class TextDataGenerator(object):
         #######################
 
         blur = args.get("blur")
+        if blur is None:
+            blur = 0 
         if args.get("random_blur"):
             blur = random.randint(0, blur)
         gaussian_filter = ImageFilter.GaussianBlur(radius=blur)
         img = img.filter(gaussian_filter)
         mask = mask.filter(gaussian_filter)
+
+        # collect labels
+        if args.get("blur") is not None:
+            label["blur_radius"] = blur 
         
         ############################################
         # Change image mode (RGB, grayscale, etc.) #
@@ -196,33 +233,43 @@ class TextDataGenerator(object):
         
         img = img.convert(args.get("image_mode")) 
 
-        #####################################
-        # Generate name for resulting image #
-        #####################################
-        name_format = args.get("name_format")
-        extension = args.get("extension")
-        if name_format == 0:
-            image_name = "{}_{}.{}".format(text, str(index), extension)
-            mask_name = "{}_{}_mask.png".format(text, str(index))
-        elif name_format == 1:
-            image_name = "{}_{}.{}".format(str(index), text, extension)
-            mask_name = "{}_{}_mask.png".format(str(index), text)
-        elif name_format == 2:
-            image_name = "{}.{}".format(str(index), extension)
-            mask_name = "{}_mask.png".format(str(index))
-        else:
-            print("{} is not a valid name format. Using default.".format(name_format))
-            image_name = "{}_{}.{}".format(text, str(index), extension)
-            mask_name = "{}_{}_mask.png".format(text, str(index))
 
-        # Save the image
-        out_dir = args.get("output_dir")
-        output_mask = args.get("output_mask")
-        if out_dir is not None:
-            img.save(os.path.join(out_dir, image_name))
-            if output_mask == 1:
-                mask.save(os.path.join(out_dir, mask_name))
+        ##################
+        # Save the image #
+        ##################
+
+        if args.get("output_data_dir") is not None:
+            # Generate name for resulting image
+            extension = args.get("extension")
+            file_prefix = args.get("dataset_id") + "_{}".format(index)
+            image_name = "{}.{}".format(file_prefix, extension)
+            mask_name = "{}_mask.png".format(file_prefix)
+            image_name = os.path.join(args.get("output_data_dir"), image_name)
+            mask_name = os.path.join(args.get("output_data_dir"), mask_name)
+
+            # save 
+            img.save(image_name)
+            label["image_name"] = os.path.basename(image_name)
+            if args.get("output_mask"):
+                mask.save(mask_name)
+                label["mask_name"] = os.path.basename(mask_name)
+
+        
+
+        ##########
+        # Return #
+        ##########
+        if returns_img:  
+            if args.get("output_mask"):
+                return img, mask, label
+            return img, label
         else:
-            if output_mask == 1:
-                return img, mask
-            return img
+            return label  
+
+
+
+
+
+
+
+

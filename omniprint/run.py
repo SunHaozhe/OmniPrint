@@ -9,6 +9,8 @@ import random
 import string
 import sys
 import numpy as np 
+import datetime
+import pandas as pd 
 
 import tqdm
 from omniprint.string_generator import (
@@ -17,7 +19,8 @@ from omniprint.string_generator import (
 	create_strings_from_wikipedia,
 	create_strings_randomly,
 )
-from omniprint.utils import load_dict, load_fonts, add_txt_extension
+from omniprint.utils import load_dict, load_fonts 
+from omniprint.utils import add_txt_extension, generate_label_dataframe 
 from omniprint.data_generator import TextDataGenerator
 import multiprocessing
 
@@ -68,7 +71,7 @@ def parse_arguments():
 	parser = argparse.ArgumentParser(
 		description="Generate synthetic text data for text recognition."
 	)
-	parser.add_argument("--output_dir", type=str, nargs="?", help="The output directory", default="out/")
+	parser.add_argument("--output_dir", type=str, nargs="?", help="The output directory", default="out")
 	parser.add_argument(
 		"-i",
 		"--input_file",
@@ -173,8 +176,9 @@ def parse_arguments():
 		"--blur",
 		type=int,
 		nargs="?",
-		help="Apply gaussian blur to the resulting sample. Should be an integer defining the blur radius",
-		default=0,
+		help="Apply gaussian blur to the resulting sample. Should be " +\
+		"an integer defining the blur radius, 0 by default.",
+		default=None,
 	)
 	parser.add_argument(
 		"-rbl",
@@ -198,18 +202,11 @@ def parse_arguments():
 		help='Define if the data will be "handwritten" by an RNN',
 	)
 	parser.add_argument(
-		"-na",
-		"--name_format",
-		type=int,
-		help="Define how the produced files will be named. 0: [TEXT]_[ID].[EXT], 1: [ID]_[TEXT].[EXT] 2: [ID].[EXT] + one file labels.txt containing id-to-label mappings",
-		default=0,
-	)
-	parser.add_argument(
 		"-om",
 		"--output_mask",
-		type=int,
+		action="store_true",
 		help="Define if the generator will return masks for the text",
-		default=0,
+		default=False,
 	)
 	parser.add_argument(
 		"-d",
@@ -343,7 +340,7 @@ def parse_arguments():
 		nargs="?",
 		help="Define rotation angle (in degree) of the generated text. " +\
 		"Used only when --linear_transform is not set",
-		default=0,
+		default=None,
 	)
 	parser.add_argument(
 		"-rrtn",
@@ -556,13 +553,7 @@ def main():
 		random.seed(args.random_seed)
 		np.random.seed(2 * args.random_seed + 1)
 
-	# Create the directory if it does not exist.
-	try:
-		os.makedirs(args.output_dir)
-	except OSError as e:
-		if e.errno != errno.EEXIST:
-			raise
-	
+
 	# Creating word list
 	if args.dict:
 		lang_dict = []
@@ -642,29 +633,71 @@ def main():
 	if args.case == "lower":
 		strings = [x.lower() for x in strings]
 
-	string_count = len(strings)
-
+	# determine fonts for each image 
+	string_count = len(strings) 
 	sampled_fonts = [fonts[random.randrange(0, len(fonts))] for _ in range(0, string_count)]
 
+	# determine the number of processes to use 
 	nb_processes = args.nb_processes
 	if nb_processes is None:
 		nb_processes = multiprocessing.cpu_count() 
 	print("Using {} processes.".format(nb_processes))
 
-	with multiprocessing.Pool(nb_processes) as pool:
-		imap_it = list(tqdm.tqdm(pool.imap_unordered(TextDataGenerator.generate_from_tuple, 
-													 zip([i for i in range(0, string_count)], 
-														strings, 
-														sampled_fonts, 
-														[vars(args)] * string_count)), 
-								total=args.count))
+	# create the dictionary of args 
+	args_dict = vars(args)
 
+	# use UTC time as the id of the generated dataset 
+	args_dict["dataset_id"] = str(datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f"))
+	dataset_dir = os.path.join(args.output_dir, args_dict["dataset_id"])
+	# create data subdirectory
+	output_data_dir = os.path.join(dataset_dir, "data")
+	if not os.path.exists(output_data_dir):
+		os.makedirs(output_data_dir)
+	# create label subdirectory
+	output_label_dir = os.path.join(dataset_dir, "label")
+	if not os.path.exists(output_label_dir):
+		os.makedirs(output_label_dir)
+	args_dict["output_data_dir"] = output_data_dir
+
+	# generate images using multiprocessing 
+	labels = []
+	with multiprocessing.Pool(nb_processes) as pool:
+		imap_it = list(tqdm.tqdm(pool.imap(TextDataGenerator.generate_from_tuple, 
+										   zip([i for i in range(0, string_count)], 
+										   	    strings, 
+										   	    sampled_fonts, 
+										   	    [args_dict] * string_count, 
+										   	    [False] * string_count)), 
+								total=args.count))
+	
+	# collect labels from different processes 
+	for label in imap_it:
+		labels.append(label)
+
+	# create the label file 
+	external_dataframes = []
+	if args.font_index:
+		path = os.path.join(font_index_dir, "metadata", "font_description.csv")
+		df = pd.read_csv(path, sep="\t", encoding="utf-8")
+		df = df.loc[:, ["font_file", "family_name", "style_name", "postscript_name", 
+						"variable_font_weight", "min_font_weight", "max_font_weight"]]
+		external_dataframes.append(df)
+	if len(external_dataframes) == 0:
+		external_dataframes = None 
+	generate_label_dataframe(labels, external_dataframes, save_path=output_label_dir)
+
+	"""
 	if args.name_format == 2:
 		# Create file with filename-to-label connections
 		with open(os.path.join(args.output_dir, "labels.txt"), "w", encoding="utf8") as f:
 			for i in range(string_count):
 				file_name = str(i) + "." + args.extension
 				f.write("{} {}\n".format(file_name, strings[i]))
+	"""
+
+def func(args):
+    return args[0] * 2
+
 
 if __name__ == "__main__":
 	main()

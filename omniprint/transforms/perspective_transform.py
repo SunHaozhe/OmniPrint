@@ -84,7 +84,8 @@ def random_quadrilateral(gaussian_std=0.05, max_nb_trials=5):
 	return _plan_square
 
 
-def transform(img, mask, quadrilateral=None, gaussian_std=0.05):
+def transform(img, mask, quadrilateral=None, gaussian_std=0.05, 
+			  return_perspective_params=False):
 	"""
 	img.mode must be "RGB"
 	mask.mode must be "L"
@@ -106,7 +107,10 @@ def transform(img, mask, quadrilateral=None, gaussian_std=0.05):
 						perspective_params, Image.BICUBIC, fillcolor=(255, 255, 255))
 	mask = mask.transform(mask.size, Image.PERSPECTIVE, 
 						perspective_params, Image.BICUBIC, fillcolor=0)
-	return img, mask
+	if not return_perspective_params:
+		return img, mask
+	else:
+		return img, mask, perspective_params 
 
 
 
