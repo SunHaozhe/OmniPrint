@@ -117,3 +117,5 @@ omniprint/prepare_fonts/fonts/
 omniprint/prepare_fonts/temporary_save_directory
 omniprint/prepare_fonts/*.tmp
 omniprint/quick_run.py
+omniprint/dataset/datasets/
+omniprint/dataset/run_dataset_formatter.py
