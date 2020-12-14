@@ -179,6 +179,8 @@ class TextDataGenerator(object):
         # collect labels
         label["offset_horizontal"] = offset_x
         label["offset_vertical"] = offset_y
+        label["original_image_width_resolution"] = background_w
+        label["original_image_height_resolution"] = background_h
         
 
         final_h = args.get("size") 
