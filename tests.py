@@ -5,7 +5,7 @@ import subprocess
 import hashlib
 import string
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "./trdg")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "./omniprint")))
 
 try:
     os.mkdir("tests/out")
@@ -14,15 +14,15 @@ except:
 
 from diffimg import diff
 
-from trdg.data_generator import FakeTextDataGenerator
-from trdg import background_generator
-from trdg.generators import (
+from omniprint.data_generator import TextDataGenerator
+from omniprint import background_generator
+from omniprint.generators import (
     GeneratorFromDict,
     GeneratorFromRandom,
     GeneratorFromStrings,
     GeneratorFromWikipedia,
 )
-from trdg.string_generator import (
+from omniprint.string_generator import (
     create_strings_from_file,
     create_strings_from_dict,
     create_strings_from_wikipedia,
@@ -120,7 +120,7 @@ class DataGenerator(unittest.TestCase):
         self.assertTrue(len(strings) == 2 and len(strings[0].split(" ")) == 3)
 
     def test_generate_data_with_format(self):
-        FakeTextDataGenerator.generate(
+        TextDataGenerator.generate(
             0,
             "TEST TEST TEST",
             "tests/font.ttf",
@@ -146,7 +146,7 @@ class DataGenerator(unittest.TestCase):
             0,
             0,
             False,
-            os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+            os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
         )
 
         self.assertTrue(
@@ -161,7 +161,7 @@ class DataGenerator(unittest.TestCase):
         os.remove("tests/out/TEST TEST TEST_0.jpg")
 
     def test_generate_data_with_extension(self):
-        FakeTextDataGenerator.generate(
+        TextDataGenerator.generate(
             1,
             "TEST TEST TEST",
             "tests/font.ttf",
@@ -187,7 +187,7 @@ class DataGenerator(unittest.TestCase):
             0,
             0,
             False,
-            os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+            os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
         )
 
         self.assertTrue(
@@ -202,7 +202,7 @@ class DataGenerator(unittest.TestCase):
         os.remove("tests/out/TEST TEST TEST_1.png")
 
     def test_generate_data_with_skew_angle(self):
-        FakeTextDataGenerator.generate(
+        TextDataGenerator.generate(
             2,
             "TEST TEST TEST",
             "tests/font.ttf",
@@ -228,7 +228,7 @@ class DataGenerator(unittest.TestCase):
             0,
             0,
             False,
-            os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+            os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
         )
 
         self.assertTrue(
@@ -243,7 +243,7 @@ class DataGenerator(unittest.TestCase):
         os.remove("tests/out/TEST TEST TEST_2.jpg")
 
     def test_generate_data_with_blur(self):
-        FakeTextDataGenerator.generate(
+        TextDataGenerator.generate(
             3,
             "TEST TEST TEST",
             "tests/font.ttf",
@@ -269,7 +269,7 @@ class DataGenerator(unittest.TestCase):
             0,
             0,
             False,
-            os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+            os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
         )
 
         self.assertTrue(
@@ -284,7 +284,7 @@ class DataGenerator(unittest.TestCase):
         os.remove("tests/out/TEST TEST TEST_3.jpg")
 
     def test_generate_data_with_sine_distorsion(self):
-        FakeTextDataGenerator.generate(
+        TextDataGenerator.generate(
             4,
             "TEST TEST TEST",
             "tests/font.ttf",
@@ -310,7 +310,7 @@ class DataGenerator(unittest.TestCase):
             0,
             0,
             False,
-            os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+            os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
         )
 
         self.assertTrue(
@@ -325,7 +325,7 @@ class DataGenerator(unittest.TestCase):
         os.remove("tests/out/TEST TEST TEST_4.jpg")
 
     def test_generate_data_with_cosine_distorsion(self):
-        FakeTextDataGenerator.generate(
+        TextDataGenerator.generate(
             5,
             "TEST TEST TEST",
             "tests/font.ttf",
@@ -351,7 +351,7 @@ class DataGenerator(unittest.TestCase):
             0,
             0,
             False,
-            os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+            os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
         )
 
         self.assertTrue(
@@ -366,7 +366,7 @@ class DataGenerator(unittest.TestCase):
         os.remove("tests/out/TEST TEST TEST_5.jpg")
 
     def test_generate_data_with_left_alignment(self):
-        FakeTextDataGenerator.generate(
+        TextDataGenerator.generate(
             6,
             "TEST TEST TEST",
             "tests/font.ttf",
@@ -392,7 +392,7 @@ class DataGenerator(unittest.TestCase):
             0,
             0,
             False,
-            os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+            os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
         )
 
         self.assertTrue(
@@ -407,7 +407,7 @@ class DataGenerator(unittest.TestCase):
         os.remove("tests/out/TEST TEST TEST_6.jpg")
 
     def test_generate_data_with_center_alignment(self):
-        FakeTextDataGenerator.generate(
+        TextDataGenerator.generate(
             7,
             "TEST TEST TEST",
             "tests/font.ttf",
@@ -433,7 +433,7 @@ class DataGenerator(unittest.TestCase):
             0,
             0,
             False,
-            os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+            os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
         )
 
         self.assertTrue(
@@ -448,7 +448,7 @@ class DataGenerator(unittest.TestCase):
         os.remove("tests/out/TEST TEST TEST_7.jpg")
 
     def test_generate_data_with_right_alignment(self):
-        FakeTextDataGenerator.generate(
+        TextDataGenerator.generate(
             8,
             "TEST TEST TEST",
             "tests/font.ttf",
@@ -474,7 +474,7 @@ class DataGenerator(unittest.TestCase):
             0,
             0,
             False,
-            os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+            os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
         )
 
         self.assertTrue(
@@ -490,7 +490,7 @@ class DataGenerator(unittest.TestCase):
 
     def test_raise_if_handwritten_and_vertical(self):
         try:
-            FakeTextDataGenerator.generate(
+            TextDataGenerator.generate(
                 9,
                 "TEST TEST TEST",
                 "tests/font.ttf",
@@ -516,14 +516,14 @@ class DataGenerator(unittest.TestCase):
                 0,
                 0,
                 False,
-                os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+                os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
             )
             raise Exception("Vertical handwritten did not throw")
         except ValueError:
             pass
 
     def test_generate_vertical_text(self):
-        FakeTextDataGenerator.generate(
+        TextDataGenerator.generate(
             10,
             "TEST TEST TEST",
             "tests/font.ttf",
@@ -549,7 +549,7 @@ class DataGenerator(unittest.TestCase):
             0,
             0,
             False,
-            os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+            os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
         )
 
         self.assertTrue(
@@ -564,7 +564,7 @@ class DataGenerator(unittest.TestCase):
         os.remove("tests/out/TEST TEST TEST_10.jpg")
 
     def test_generate_horizontal_text_with_variable_space(self):
-        FakeTextDataGenerator.generate(
+        TextDataGenerator.generate(
             11,
             "TEST TEST TEST",
             "tests/font.ttf",
@@ -590,7 +590,7 @@ class DataGenerator(unittest.TestCase):
             0,
             0,
             False,
-            os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+            os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
         )
 
         self.assertTrue(
@@ -605,7 +605,7 @@ class DataGenerator(unittest.TestCase):
         os.remove("tests/out/TEST TEST TEST_11.jpg")
 
     def test_generate_vertical_text_with_variable_space(self):
-        FakeTextDataGenerator.generate(
+        TextDataGenerator.generate(
             12,
             "TEST TEST TEST",
             "tests/font.ttf",
@@ -631,7 +631,7 @@ class DataGenerator(unittest.TestCase):
             0,
             0,
             False,
-            os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+            os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
         )
 
         self.assertTrue(
@@ -647,7 +647,7 @@ class DataGenerator(unittest.TestCase):
 
     def test_generate_text_with_unknown_orientation(self):
         try:
-            FakeTextDataGenerator.generate(
+            TextDataGenerator.generate(
                 12,
                 "TEST TEST TEST",
                 "tests/font.ttf",
@@ -673,14 +673,14 @@ class DataGenerator(unittest.TestCase):
                 0,
                 0,
                 False,
-                os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+                os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
             )
             raise Exception("Unknown orientation did not throw")
         except ValueError:
             pass
 
     def test_generate_data_with_fit(self):
-        FakeTextDataGenerator.generate(
+        TextDataGenerator.generate(
             13,
             "TEST TEST TEST",
             "tests/font.ttf",
@@ -706,7 +706,7 @@ class DataGenerator(unittest.TestCase):
             1,
             0,
             False,
-            os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+            os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
         )
 
         self.assertTrue(
@@ -721,7 +721,7 @@ class DataGenerator(unittest.TestCase):
         os.remove("tests/out/TEST TEST TEST_13.jpg")
 
     def test_generate_data_with_word_split(self):
-        FakeTextDataGenerator.generate(
+        TextDataGenerator.generate(
             14,
             "TEST TEST TEST",
             "tests/font.ttf",
@@ -747,7 +747,7 @@ class DataGenerator(unittest.TestCase):
             0,
             0,
             True,
-            os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+            os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
         )
 
         self.assertTrue(
@@ -762,7 +762,7 @@ class DataGenerator(unittest.TestCase):
         os.remove("tests/out/TEST TEST TEST_14.png")
 
     def test_generate_data_with_first_name_format(self):
-        FakeTextDataGenerator.generate(
+        TextDataGenerator.generate(
             15,
             "TEST TEST TEST",
             "tests/font.ttf",
@@ -788,7 +788,7 @@ class DataGenerator(unittest.TestCase):
             0,
             0,
             True,
-            os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+            os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
         )
 
         self.assertTrue(
@@ -803,7 +803,7 @@ class DataGenerator(unittest.TestCase):
         os.remove("tests/out/TEST TEST TEST_15.png")
 
     def test_generate_data_with_second_name_format(self):
-        FakeTextDataGenerator.generate(
+        TextDataGenerator.generate(
             16,
             "TEST TEST TEST",
             "tests/font.ttf",
@@ -829,7 +829,7 @@ class DataGenerator(unittest.TestCase):
             0,
             0,
             True,
-            os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+            os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
         )
 
         self.assertTrue(
@@ -844,7 +844,7 @@ class DataGenerator(unittest.TestCase):
         os.remove("tests/out/16_TEST TEST TEST.png")
 
     def test_generate_data_with_third_name_format(self):
-        FakeTextDataGenerator.generate(
+        TextDataGenerator.generate(
             17,
             "TEST TEST TEST",
             "tests/font.ttf",
@@ -870,7 +870,7 @@ class DataGenerator(unittest.TestCase):
             0,
             0,
             True,
-            os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+            os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
         )
 
         self.assertTrue(
@@ -885,7 +885,7 @@ class DataGenerator(unittest.TestCase):
         os.remove("tests/out/17.png")
 
     def test_generate_data_with_wrong_name_format(self):
-        FakeTextDataGenerator.generate(
+        TextDataGenerator.generate(
             18,
             "TEST TEST TEST",
             "tests/font.ttf",
@@ -911,7 +911,7 @@ class DataGenerator(unittest.TestCase):
             0,
             0,
             True,
-            os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+            os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
         )
 
         self.assertTrue(
@@ -926,7 +926,7 @@ class DataGenerator(unittest.TestCase):
         os.remove("tests/out/TEST TEST TEST_18.png")
 
     def test_generate_data_with_quasicrystal_background_from_generate(self):
-        FakeTextDataGenerator.generate(
+        TextDataGenerator.generate(
             19,
             "TEST TEST TEST",
             "tests/font.ttf",
@@ -952,14 +952,14 @@ class DataGenerator(unittest.TestCase):
             0,
             0,
             True,
-            os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+            os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
         )
 
         os.remove("tests/out/TEST TEST TEST_19.png")
 
     def test_raise_if_invalid_orientation(self):
         try:
-            FakeTextDataGenerator.generate(
+            TextDataGenerator.generate(
                 20,
                 "TEST TEST TEST",
                 "tests/font.ttf",
@@ -985,14 +985,14 @@ class DataGenerator(unittest.TestCase):
                 0,
                 0,
                 False,
-                os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+                os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
             )
             raise Exception("Invalid orientation did not throw")
         except ValueError:
             pass
 
     def test_generate_data_with_arabic_text(self):
-        FakeTextDataGenerator.generate(
+        TextDataGenerator.generate(
             21,
             "اختبار اختبار اختبار",
             "tests/font_ar.ttf",
@@ -1018,7 +1018,7 @@ class DataGenerator(unittest.TestCase):
             0,
             0,
             True,
-            os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+            os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
         )
 
         self.assertTrue(
@@ -1033,7 +1033,7 @@ class DataGenerator(unittest.TestCase):
         os.remove("tests/out/21_اختبار اختبار اختبار.png")
 
     def test_generate_data_with_hindi_text(self):
-        FakeTextDataGenerator.generate(
+        TextDataGenerator.generate(
             22,
             "परीक्षा परीक्षा परीक्षा",
             "tests/font_hi.ttf",
@@ -1059,7 +1059,7 @@ class DataGenerator(unittest.TestCase):
             0,
             0,
             True,
-            os.path.join(os.path.split(os.path.realpath(__file__))[0], "trdg/images"),
+            os.path.join(os.path.split(os.path.realpath(__file__))[0], "omniprint/images"),
         )
 
         self.assertTrue(
@@ -1120,7 +1120,7 @@ class DataGenerator(unittest.TestCase):
 class CommandLineInterface(unittest.TestCase):
     def test_output_dir(self):
         args = ["python3", "run.py", "-c", "1", "--output_dir", "../tests/out_2/"]
-        subprocess.Popen(args, cwd="trdg/").wait()
+        subprocess.Popen(args, cwd="omniprint/").wait()
         self.assertTrue(len(os.listdir("tests/out_2/")) == 1)
         empty_directory("tests/out_2/")
 
@@ -1135,7 +1135,7 @@ class CommandLineInterface(unittest.TestCase):
             "--output_dir",
             "../tests/out/",
         ]
-        subprocess.Popen(args, cwd="trdg/").wait()
+        subprocess.Popen(args, cwd="omniprint/").wait()
         self.assertTrue(len(os.listdir("tests/out/")) == 1)
         empty_directory("tests/out/")
 
@@ -1150,7 +1150,7 @@ class CommandLineInterface(unittest.TestCase):
             "--output_dir",
             "../tests/out/",
         ]
-        subprocess.Popen(args, cwd="trdg/").wait()
+        subprocess.Popen(args, cwd="omniprint/").wait()
         self.assertTrue(len(os.listdir("tests/out/")) == 1)
         empty_directory("tests/out/")
 
@@ -1165,7 +1165,7 @@ class CommandLineInterface(unittest.TestCase):
             "--output_dir",
             "../tests/out/",
         ]
-        subprocess.Popen(args, cwd="trdg/").wait()
+        subprocess.Popen(args, cwd="omniprint/").wait()
         self.assertTrue(len(os.listdir("tests/out/")) == 1)
         empty_directory("tests/out/")
 
@@ -1180,7 +1180,7 @@ class CommandLineInterface(unittest.TestCase):
             "--output_dir",
             "../tests/out/",
         ]
-        subprocess.Popen(args, cwd="trdg/").wait()
+        subprocess.Popen(args, cwd="omniprint/").wait()
         self.assertTrue(len(os.listdir("tests/out/")) == 1)
         empty_directory("tests/out/")
 
@@ -1195,13 +1195,13 @@ class CommandLineInterface(unittest.TestCase):
             "--output_dir",
             "../tests/out/",
         ]
-        subprocess.Popen(args, cwd="trdg/").wait()
+        subprocess.Popen(args, cwd="omniprint/").wait()
         self.assertTrue(len(os.listdir("tests/out/")) == 1)
         empty_directory("tests/out/")
 
     def test_count_parameter(self):
         args = ["python3", "run.py", "-c", "10", "--output_dir", "../tests/out/"]
-        subprocess.Popen(args, cwd="trdg/").wait()
+        subprocess.Popen(args, cwd="omniprint/").wait()
         self.assertTrue(len(os.listdir("tests/out/")) == 10)
         empty_directory("tests/out/")
 
@@ -1216,7 +1216,7 @@ class CommandLineInterface(unittest.TestCase):
             "--output_dir",
             "../tests/out/",
         ]
-        subprocess.Popen(args, cwd="trdg/").wait()
+        subprocess.Popen(args, cwd="omniprint/").wait()
         self.assertTrue(
             all(
                 [
@@ -1239,7 +1239,7 @@ class CommandLineInterface(unittest.TestCase):
             "--output_dir",
             "../tests/out/",
         ]
-        subprocess.Popen(args, cwd="trdg/").wait()
+        subprocess.Popen(args, cwd="omniprint/").wait()
         self.assertTrue(
             all(
                 [
@@ -1262,7 +1262,7 @@ class CommandLineInterface(unittest.TestCase):
             "--output_dir",
             "../tests/out/",
         ]
-        subprocess.Popen(args, cwd="trdg/").wait()
+        subprocess.Popen(args, cwd="omniprint/").wait()
         with open("tests/out/labels.txt", "r") as f:
             self.assertTrue(
                 all(
@@ -1276,7 +1276,7 @@ class CommandLineInterface(unittest.TestCase):
 
     def test_handwritten(self):
         args = ["python3", "run.py", "-c", "1", "--output_dir", "../tests/out/"]
-        subprocess.Popen(args, cwd="trdg/").wait()
+        subprocess.Popen(args, cwd="omniprint/").wait()
         self.assertTrue(len(os.listdir("tests/out/")) == 1)
         empty_directory("tests/out/")
 
@@ -1291,7 +1291,7 @@ class CommandLineInterface(unittest.TestCase):
             "--output_dir",
             "../tests/out/",
         ]
-        subprocess.Popen(args, cwd="trdg/").wait()
+        subprocess.Popen(args, cwd="omniprint/").wait()
         self.assertTrue(len(os.listdir("tests/out/")) == 1)
         empty_directory("tests/out/")
 
@@ -1306,7 +1306,7 @@ class CommandLineInterface(unittest.TestCase):
             "--output_dir",
             "../tests/out/",
         ]
-        subprocess.Popen(args, cwd="trdg/").wait()
+        subprocess.Popen(args, cwd="omniprint/").wait()
         self.assertTrue(len(os.listdir("tests/out/")) == 0)
         empty_directory("tests/out/")
 
@@ -1321,7 +1321,7 @@ class CommandLineInterface(unittest.TestCase):
             "--output_dir",
             "../tests/out/",
         ]
-        subprocess.Popen(args, cwd="trdg/").wait()
+        subprocess.Popen(args, cwd="omniprint/").wait()
         self.assertTrue(len(os.listdir("tests/out/")) == 1)
         empty_directory("tests/out/")
 
@@ -1336,7 +1336,7 @@ class CommandLineInterface(unittest.TestCase):
             "--output_dir",
             "../tests/out/",
         ]
-        subprocess.Popen(args, cwd="trdg/").wait()
+        subprocess.Popen(args, cwd="omniprint/").wait()
         self.assertTrue(len(os.listdir("tests/out/")) == 0)
         empty_directory("tests/out/")
 
@@ -1351,7 +1351,7 @@ class CommandLineInterface(unittest.TestCase):
             "--output_dir",
             "../tests/out/",
         ]
-        subprocess.Popen(args, cwd="trdg/").wait()
+        subprocess.Popen(args, cwd="omniprint/").wait()
         self.assertTrue(len(os.listdir("tests/out/")) == 1)
         empty_directory("tests/out/")
 
@@ -1366,7 +1366,7 @@ class CommandLineInterface(unittest.TestCase):
             "--output_dir",
             "../tests/out/",
         ]
-        subprocess.Popen(args, cwd="trdg/").wait()
+        subprocess.Popen(args, cwd="omniprint/").wait()
         self.assertTrue(len(os.listdir("tests/out/")) == 0)
         empty_directory("tests/out/")
 
@@ -1381,44 +1381,44 @@ class CommandLineInterface(unittest.TestCase):
             "--output_dir",
             "../tests/out/",
         ]
-        subprocess.Popen(args, cwd="trdg/").wait()
+        subprocess.Popen(args, cwd="omniprint/").wait()
         self.assertTrue(len(os.listdir("tests/out/")) == 0)
         empty_directory("tests/out/")
 
 
 #    def test_word_count(self):
 #        args = ['python3', 'run.py', '-c', '1', '-w', '5']
-#        subprocess.Popen(args, cwd="trdg/").wait()
+#        subprocess.Popen(args, cwd="omniprint/").wait()
 #        self.assertTrue(False)
 #        empty_directory('tests/out/')
 #
 #    def test_extension_jpg(self):
 #        args = ['python3', 'run.py', '-c', '1', '-e', 'jpg']
-#        subprocess.Popen(args, cwd="trdg/").wait()
+#        subprocess.Popen(args, cwd="omniprint/").wait()
 #        self.assertTrue(False)
 #        empty_directory('tests/out/')
 #
 #    def test_extension_png(self):
 #        args = ['python3', 'run.py', '-c', '1', '-e', 'png']
-#        subprocess.Popen(args, cwd="trdg/").wait()
+#        subprocess.Popen(args, cwd="omniprint/").wait()
 #        self.assertTrue(False)
 #        empty_directory('tests/out/')
 #
 #    def test_name_format_0(self):
 #        args = ['python3', 'run.py', '-c', '1', '-na', '0']
-#        subprocess.Popen(args, cwd="trdg/").wait()
+#        subprocess.Popen(args, cwd="omniprint/").wait()
 #        self.assertTrue(False)
 #        empty_directory('tests/out/')
 #
 #    def test_name_format_1(self):
 #        args = ['python3', 'run.py', '-c', '1', '-na', '1']
-#        subprocess.Popen(args, cwd="trdg/").wait()
+#        subprocess.Popen(args, cwd="omniprint/").wait()
 #        self.assertTrue(False)
 #        empty_directory('tests/out/')
 #
 #    def test_name_format_2(self):
 #        args = ['python3', 'run.py', '-c', '1', '-na', '2']
-#        subprocess.Popen(args, cwd="trdg/").wait()
+#        subprocess.Popen(args, cwd="omniprint/").wait()
 #        self.assertTrue(False)
 #        empty_directory('tests/out/')
 
