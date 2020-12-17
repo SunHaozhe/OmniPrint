@@ -71,7 +71,7 @@ def parse_arguments():
 	parser = argparse.ArgumentParser(
 		description="Generate synthetic text data for text recognition."
 	)
-	parser.add_argument("--output_dir", type=str, nargs="?", help="The output directory", default="out")
+	parser.add_argument("--output_dir", type=str, nargs="?", help="The output directory", default="tmp/out")
 	parser.add_argument(
 		"-i",
 		"--input_file",
@@ -538,6 +538,12 @@ def parse_arguments():
 		default=None,
 		const=0.05
 	)
+	parser.add_argument(
+		"-imgname",
+		"--img_name",
+		type=str,
+		default="0"
+	)
 	return parser.parse_args()
 
 
@@ -648,16 +654,17 @@ def main():
 
 	# use UTC time as the id of the generated dataset 
 	args_dict["dataset_id"] = str(datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f"))
-	dataset_dir = os.path.join(args.output_dir, args_dict["dataset_id"])
+	dataset_dir = args.output_dir
+	
 	# create data subdirectory
-	output_data_dir = os.path.join(dataset_dir, "data")
-	if not os.path.exists(output_data_dir):
-		os.makedirs(output_data_dir)
+	#output_data_dir = os.path.join(dataset_dir, "data")
+	if not os.path.exists(dataset_dir):
+		os.makedirs(dataset_dir)
 	# create label subdirectory
-	output_label_dir = os.path.join(dataset_dir, "label")
-	if not os.path.exists(output_label_dir):
-		os.makedirs(output_label_dir)
-	args_dict["output_data_dir"] = output_data_dir
+	#output_label_dir = os.path.join(dataset_dir, "label")
+	#if not os.path.exists(output_label_dir):
+	#	os.makedirs(output_label_dir)
+	args_dict["output_data_dir"] = dataset_dir
 
 	# generate images using multiprocessing 
 	labels = []
@@ -670,6 +677,7 @@ def main():
 										   	    [False] * string_count)), 
 								total=args.count))
 	
+	"""
 	# collect labels from different processes 
 	for label in imap_it:
 		labels.append(label)
@@ -685,6 +693,7 @@ def main():
 	if len(external_dataframes) == 0:
 		external_dataframes = None 
 	generate_label_dataframe(labels, external_dataframes, save_path=output_label_dir)
+	"""
 
 	"""
 	if args.name_format == 2:

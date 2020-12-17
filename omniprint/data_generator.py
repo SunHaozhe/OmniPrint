@@ -2,6 +2,10 @@ import os
 import random 
 import math 
 import numpy as np 
+import cv2
+from skimage import transform as skimage_transform 
+import scipy 
+
 
 import PIL
 from PIL import Image, ImageFilter
@@ -19,6 +23,58 @@ _high_level_lt_params = ["rotation", "shear_x", "shear_y", "scale_x",
 _random_high_level_lt_params = ["random_rotation", "random_shear_x", "random_shear_y", 
                                 "random_scale_x", "random_scale_y", "random_alpha", 
                                 "random_beta", "random_gamma", "random_delta"]
+
+
+def float2int_image(img):
+    """
+    https://stackoverflow.com/a/38869210/7636942
+    
+    convert values 0-1 float to 0-255 int format
+    img:
+        np.array of dtype float 
+    """
+    return (np.clip(img, 0, 1) * 255).astype(np.uint8)
+
+def int2float_image(img):
+    """
+    https://stackoverflow.com/a/38869210/7636942
+    
+    convert values 0-255 int to 0-1 float format
+    img:
+        np.array of dtype uint8
+    """ 
+    return (np.clip(img, 0, 255) / 255).astype(np.float32)
+
+def gaussian_lanczos(img, size, sigma):
+    """
+    first apply Gaussian filter to smooth image, 
+    then resize image using Lanczos filter with reducing_gap=4 
+    
+    img:
+        PIL.Image.Image or np.array
+    size:
+        tuple of size 2
+    sigma:
+        scalar 
+    """
+    img = scipy.ndimage.gaussian_filter(img, sigma=sigma)
+    return Image.fromarray(img).resize(size, resample=Image.LANCZOS, reducing_gap=4)
+
+def gaussian_bilinear(img, size, sigma):
+    """
+    first apply Gaussian filter to smooth image, 
+    then resize image using bilinear filter with reducing_gap=4 
+    
+    img:
+        PIL.Image.Image or np.array
+    size:
+        tuple of size 2
+    sigma:
+        scalar 
+    """
+    img = scipy.ndimage.gaussian_filter(img, sigma=sigma)
+    return Image.fromarray(img).resize(size, resample=Image.BILINEAR, reducing_gap=4)
+
 
 
 class TextDataGenerator(object):
@@ -154,6 +210,7 @@ class TextDataGenerator(object):
         # Resize image to desired format #
         ##################################
 
+
         if args.get("ensure_square_layout"):
             max_size = max(img.size[0], img.size[1]) 
             background_w = math.ceil(max_size / (1 - margin_left - margin_right))
@@ -182,82 +239,182 @@ class TextDataGenerator(object):
         label["original_image_width_resolution"] = background_w
         label["original_image_height_resolution"] = background_h
         
+        # _0
+        image_name = args.get("img_name") + "_0.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        img.save(image_name)
 
+        # _1 resize 105x105
+        tmp_img = img.resize((105, 105), resample=Image.LANCZOS, reducing_gap=4) 
+        image_name = args.get("img_name") + "_1_0.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = gaussian_lanczos(img, size=(105, 105), sigma=1)
+        image_name = args.get("img_name") + "_1_1.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = gaussian_lanczos(img, size=(105, 105), sigma=2)
+        image_name = args.get("img_name") + "_1_2.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = gaussian_lanczos(img, size=(105, 105), sigma=3)
+        image_name = args.get("img_name") + "_1_3.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        ##### 
+        tmp_img = float2int_image(cv2.resize(int2float_image(np.array(img)), (105, 105), 
+                                           interpolation=cv2.INTER_AREA))
+        tmp_img = Image.fromarray(tmp_img, mode="RGB")
+        image_name = args.get("img_name") + "_1_4.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = float2int_image(cv2.resize(int2float_image(np.array(img)), (105, 105), 
+                                           interpolation=cv2.INTER_LANCZOS4))
+        tmp_img = Image.fromarray(tmp_img, mode="RGB")
+        image_name = args.get("img_name") + "_1_5.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = gaussian_bilinear(img, size=(105, 105), sigma=0.1)
+        image_name = args.get("img_name") + "_1_6.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = gaussian_bilinear(img, size=(105, 105), sigma=1)
+        image_name = args.get("img_name") + "_1_7.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = gaussian_bilinear(img, size=(105, 105), sigma=3)
+        image_name = args.get("img_name") + "_1_8.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+
+        # _2 resize 64x64
+        tmp_img = img.resize((64, 64), resample=Image.LANCZOS, reducing_gap=4) 
+        image_name = args.get("img_name") + "_2_0.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = gaussian_lanczos(img, size=(64, 64), sigma=0.5)
+        image_name = args.get("img_name") + "_2_1.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = gaussian_lanczos(img, size=(64, 64), sigma=1)
+        image_name = args.get("img_name") + "_2_2.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = gaussian_lanczos(img, size=(64, 64), sigma=2)
+        image_name = args.get("img_name") + "_2_3.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = gaussian_lanczos(img, size=(64, 64), sigma=3)
+        image_name = args.get("img_name") + "_2_4.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        ##### 
+        tmp_img = float2int_image(cv2.resize(int2float_image(np.array(img)), (64, 64), 
+                                           interpolation=cv2.INTER_AREA))
+        tmp_img = Image.fromarray(tmp_img, mode="RGB")
+        image_name = args.get("img_name") + "_2_5.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = float2int_image(cv2.resize(int2float_image(np.array(img)), (64, 64), 
+                                           interpolation=cv2.INTER_LANCZOS4))
+        tmp_img = Image.fromarray(tmp_img, mode="RGB")
+        image_name = args.get("img_name") + "_2_6.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = gaussian_bilinear(img, size=(64, 64), sigma=0.1)
+        image_name = args.get("img_name") + "_2_7.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = gaussian_bilinear(img, size=(64, 64), sigma=1)
+        image_name = args.get("img_name") + "_2_8.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = gaussian_bilinear(img, size=(64, 64), sigma=3)
+        image_name = args.get("img_name") + "_2_9.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        # _3 resize 32x32
         final_h = args.get("size") 
         if args.get("ensure_square_layout"):
             final_w = args.get("size")
         else:
             final_w = math.ceil(final_h * img.size[0] / img.size[1])
 
-        img = img.resize((final_w, final_h), resample=Image.LANCZOS, reducing_gap=4) 
-        mask = mask.resize((final_w, final_h), resample=Image.LANCZOS, reducing_gap=4)
+        tmp_img = img.resize((32, 32), resample=Image.LANCZOS, reducing_gap=4) 
+        image_name = args.get("img_name") + "_3_0.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = gaussian_lanczos(img, size=(32, 32), sigma=0.5)
+        image_name = args.get("img_name") + "_3_1.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = gaussian_lanczos(img, size=(32, 32), sigma=1)
+        image_name = args.get("img_name") + "_3_2.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = gaussian_lanczos(img, size=(32, 32), sigma=2)
+        image_name = args.get("img_name") + "_3_3.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = gaussian_lanczos(img, size=(32, 32), sigma=3)
+        image_name = args.get("img_name") + "_3_4.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        ##### 
+        tmp_img = float2int_image(cv2.resize(int2float_image(np.array(img)), (32, 32), 
+                                           interpolation=cv2.INTER_AREA))
+        tmp_img = Image.fromarray(tmp_img, mode="RGB")
+        image_name = args.get("img_name") + "_3_5.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = float2int_image(cv2.resize(int2float_image(np.array(img)), (32, 32), 
+                                           interpolation=cv2.INTER_LANCZOS4))
+        tmp_img = Image.fromarray(tmp_img, mode="RGB")
+        image_name = args.get("img_name") + "_3_6.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = gaussian_bilinear(img, size=(32, 32), sigma=0.1)
+        image_name = args.get("img_name") + "_3_7.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = gaussian_bilinear(img, size=(32, 32), sigma=1)
+        image_name = args.get("img_name") + "_3_8.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
+
+        tmp_img = gaussian_bilinear(img, size=(32, 32), sigma=3)
+        image_name = args.get("img_name") + "_3_9.png"
+        image_name = os.path.join(args.get("output_data_dir"), image_name)
+        tmp_img.save(image_name)
         
-        # collect labels
-        label["image_width_resolution"] = final_w
-        label["image_height_resolution"] = final_h
         
-        #############################
-        # Generate background image #
-        #############################
-        background_type = args.get("background")
-        if background_type == 0:
-            background_img = background_generator.gaussian_noise(final_h, final_w)
-        elif background_type == 1:
-            background_img = background_generator.plain_white(final_h, final_w)
-        elif background_type == 2:
-            background_img = background_generator.quasicrystal(final_h, final_w)
-        else:
-            background_img = background_generator.image(final_h, final_w, args.get("image_dir"))
-
-        background_img.paste(img, (0, 0), mask)
-        img = background_img
-        
-        #######################
-        # Apply gaussian blur #
-        #######################
-
-        blur = args.get("blur")
-        if blur is None:
-            blur = 0 
-        if args.get("random_blur"):
-            blur = random.randint(0, blur)
-        gaussian_filter = ImageFilter.GaussianBlur(radius=blur)
-        img = img.filter(gaussian_filter)
-        mask = mask.filter(gaussian_filter)
-
-        # collect labels
-        if args.get("blur") is not None:
-            label["blur_radius"] = blur 
-        
-        ############################################
-        # Change image mode (RGB, grayscale, etc.) #
-        ############################################
-        
-        img = img.convert(args.get("image_mode")) 
-
-
-        ##################
-        # Save the image #
-        ##################
-
-        if args.get("output_data_dir") is not None:
-            # Generate name for resulting image
-            extension = args.get("extension")
-            file_prefix = args.get("dataset_id") + "_{}".format(index)
-            image_name = "{}.{}".format(file_prefix, extension)
-            mask_name = "{}_mask.png".format(file_prefix)
-            image_name = os.path.join(args.get("output_data_dir"), image_name)
-            mask_name = os.path.join(args.get("output_data_dir"), mask_name)
-
-            # save 
-            img.save(image_name)
-            label["image_name"] = os.path.basename(image_name)
-            if args.get("output_mask"):
-                mask.save(mask_name)
-                label["mask_name"] = os.path.basename(mask_name)
-
-        
-
         ##########
         # Return #
         ##########
