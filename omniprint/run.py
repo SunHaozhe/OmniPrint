@@ -538,6 +538,16 @@ def parse_arguments():
 		default=None,
 		const=0.05
 	)
+	parser.add_argument(
+		"-gpr",
+		"--gaussian_prior_resizing",
+		type=float,
+		help="If not None, apply Gaussian filter to smooth image prior to resizing, " +\
+		"the argument of this parameter needs to be a float, which will be used as the " +\
+		"standard deviation of Gaussian filter. Default is None, which means Gaussian " +\
+		"filter is not used before resizing. ",
+		default=None
+	)
 	return parser.parse_args()
 
 

@@ -2,6 +2,7 @@ import os
 import random 
 import math 
 import numpy as np 
+import scipy 
 
 import PIL
 from PIL import Image, ImageFilter
@@ -54,10 +55,14 @@ class TextDataGenerator(object):
         if len(text) == 1:
             label["unicode_code_point"] = ord(text)
         label["font_file"] = os.path.basename(font_file_path)
+        label["margin_top"] = margin_top
+        label["margin_left"] = margin_left
+        label["margin_bottom"] = margin_bottom
+        label["margin_right"] = margin_right
 
-        ##########################
-        # Create picture of text #
-        ##########################
+        ########################
+        # Create image of text #
+        ########################
 
         if args.get("handwritten"):
             if args.get("orientation") == 1:
@@ -189,8 +194,19 @@ class TextDataGenerator(object):
         else:
             final_w = math.ceil(final_h * img.size[0] / img.size[1])
 
-        img = img.resize((final_w, final_h), resample=Image.LANCZOS, reducing_gap=4) 
-        mask = mask.resize((final_w, final_h), resample=Image.LANCZOS, reducing_gap=4)
+        # resize img and mask 
+        gaussian_prior_resizing = args.get("gaussian_prior_resizing") 
+        if gaussian_prior_resizing is None:
+            # directly resize
+            img = img.resize((final_w, final_h), resample=Image.LANCZOS, reducing_gap=4) 
+            mask = mask.resize((final_w, final_h), resample=Image.LANCZOS, reducing_gap=4)
+        else:
+            # apply Gaussian filter before resizing 
+            img = gaussian_lanczos(img, size=(final_w, final_h), 
+                                   sigma=gaussian_prior_resizing)
+            mask = gaussian_lanczos(mask, size=(final_w, final_h), 
+                                    sigma=gaussian_prior_resizing)
+            label["gaussian_prior_resizing"] = gaussian_prior_resizing
         
         # collect labels
         label["image_width_resolution"] = final_w
@@ -271,6 +287,20 @@ class TextDataGenerator(object):
 
 
 
+def gaussian_lanczos(img, size, sigma):
+    """
+    first apply Gaussian filter to smooth image, 
+    then resize image using Lanczos filter with reducing_gap=4 
+    
+    img:
+        PIL.Image.Image or np.array
+    size:
+        tuple of size 2
+    sigma:
+        scalar 
+    """
+    img = scipy.ndimage.gaussian_filter(img, sigma=sigma)
+    return Image.fromarray(img).resize(size, resample=Image.LANCZOS, reducing_gap=4)
 
 
 
