@@ -9,6 +9,7 @@ from PIL import Image, ImageFilter
 
 from omniprint import freetype_text_generator, background_generator, distorsion_generator
 import transforms
+from utils import fill_stroke_color 
 
 try:
     from omniprint import handwritten_text_generator
@@ -95,8 +96,62 @@ class TextDataGenerator(object):
                                                                transform_param=transform_param, 
                                                                font_size=args.get("font_size"), 
                                                                font_weight=args.get("font_weight"), 
-                                                               stroke_radius=args.get("outline_width"), 
-                                                               stroke_fill=args.get("stroke_fill"))
+                                                               stroke_radius=args.get("outline_width"))
+            
+
+            # morphological image processing, applied before color filling 
+            morph_operations = zip(["morph_erosion", 
+                                    "morph_dilation"], 
+                                   [transforms.morph_erosion_transform, 
+                                    transforms.morph_dilation_transform])
+            for morph_operation, morph_func in morph_operations:
+                if args.get(morph_operation) is not None:
+                    kernel_size, iterations, kernel_shape = args.get(morph_operation) 
+                    if args.get("random_{}".format(morph_operation)):
+                        kernel_size = np.random.randint(1, kernel_size + 1)
+                        iterations = np.random.randint(1, iterations + 1)
+                        kernel_shape = np.random.choice([None, "ellipse", "cross"], 
+                                                         size=None, replace=True)
+                    img, mask = morph_func(img, mask, 
+                                           kernel_size=kernel_size, 
+                                           iterations=iterations, 
+                                           kernel_shape=kernel_shape)
+                    label["{}_kernel_size".format(morph_operation)] = kernel_size
+                    if kernel_shape is None:
+                        kernel_shape = "rectangle"
+                    label["{}_kernel_shape".format(morph_operation)] = kernel_shape 
+                    label["{}_iterations".format(morph_operation)] = iterations 
+
+            morph_operations = zip(["morhp_opening",
+                                    "morhp_closing",
+                                    "morhp_gradient",
+                                    "morhp_tophat",
+                                    "morhp_blackhat"], 
+                                   [transforms.morhp_opening_transform,
+                                    transforms.morhp_closing_transform,
+                                    transforms.morhp_gradient_transform,
+                                    transforms.morhp_tophat_transform,
+                                    transforms.morhp_blackhat_transform])
+            for morph_operation, morph_func in morph_operations:
+                if args.get(morph_operation) is not None: 
+                    kernel_size, kernel_shape = args.get(morph_operation) 
+                    if args.get("random_{}".format(morph_operation)): 
+                        kernel_size = np.random.randint(1, kernel_size + 1) 
+                        kernel_shape = np.random.choice([None, "ellipse", "cross"], 
+                                                         size=None, replace=True)
+                    img, mask = morph_func(img, mask, 
+                                           kernel_size=kernel_size, 
+                                           kernel_shape=kernel_shape)
+                    label["{}_kernel_size".format(morph_operation)] = kernel_size
+                    if kernel_shape is None:
+                        kernel_shape = "rectangle"
+                    label["{}_kernel_shape".format(morph_operation)] = kernel_shape
+                    
+
+
+            # change the fill color of text stroke
+            img = fill_stroke_color(img, args.get("stroke_fill"))
+
             # collect labels
             for x in ["font_weight", "stroke_fill"]:
                 if args.get(x) is not None:

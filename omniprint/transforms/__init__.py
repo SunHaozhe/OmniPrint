@@ -1,5 +1,11 @@
 from transforms.perspective_transform import transform as perspective_transform
-
+from transforms.morphological_transform import morph_erosion_transform as morph_erosion_transform
+from transforms.morphological_transform import morph_dilation_transform as morph_dilation_transform
+from transforms.morphological_transform import morhp_opening_transform as morhp_opening_transform
+from transforms.morphological_transform import morhp_closing_transform as morhp_closing_transform
+from transforms.morphological_transform import morhp_gradient_transform as morhp_gradient_transform
+from transforms.morphological_transform import morhp_tophat_transform as morhp_tophat_transform
+from transforms.morphological_transform import morhp_blackhat_transform as morhp_blackhat_transform
 
 
 

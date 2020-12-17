@@ -5,6 +5,8 @@ Utility functions
 import os
 import glob
 import pandas as pd 
+import numpy as np 
+from PIL import Image 
 
 
 def load_dict(lang):
@@ -65,19 +67,53 @@ def generate_label_dataframe(labels, external_dataframes=None, save_path=None):
 			columns.insert(0, columns.pop(index_))
 	
 	df = pd.DataFrame(labels, columns=columns)
-	for external_dataframe in external_dataframes:
-		df = df.merge(external_dataframe, how="left")
+	if external_dataframes is not None:
+		for external_dataframe in external_dataframes:
+			df = df.merge(external_dataframe, how="left")
 		
-
+	
 	if save_path is not None:
 		df.to_csv(os.path.join(save_path, "raw_labels.csv"), sep="\t", encoding="utf-8")
 	return df 
 
 
+def fill_stroke_color(img, stroke_fill, black_=0):
+    """
+    change the fill color of text stroke
+
+    img:
+        PIL.Image.Image (RGB)
+    return PIL.Image.Image 
+    """
+    if stroke_fill is not None: 
+        assert len(stroke_fill) == 3, "stroke_fill must be a iterable of length 3."
+        img_mode = img.mode 
+        img = np.array(img)
+        black_areas = (img[:, :, 0] == black_) & (img[:, :, 1] == black_) & (img[:, :, 2] == black_)
+        img[black_areas, :] = stroke_fill 
+        img = Image.fromarray(img, mode=img_mode)  
+    return img 
 
 
+def float2int_image(img):
+    """
+    https://stackoverflow.com/a/38869210/7636942
+    
+    convert values 0-1 float to 0-255 int format
+    img:
+        np.array of dtype float 
+    """
+    return (np.clip(img, 0, 1) * 255).astype(np.uint8)
 
-
+def int2float_image(img):
+    """
+    https://stackoverflow.com/a/38869210/7636942
+    
+    convert values 0-255 int to 0-1 float format
+    img:
+        np.array of dtype uint8
+    """ 
+    return (np.clip(img, 0, 255) / 255).astype(np.float32)
 
 
 

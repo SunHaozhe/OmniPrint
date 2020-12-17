@@ -3,6 +3,7 @@ import numpy as np
 from freetype import *
 from PIL import Image 
 from numba import jit 
+from utils import fill_stroke_color
 
 
 _lt_keywords = ["rotation", "shear_x", "shear_y", "scale_x", "scale_y"]
@@ -87,8 +88,7 @@ def _fill_data(bitmap_buffer, rows, width, pitch):
 
 
 def render_lt_text(text, font_file_path, transform_param=None, 
-                   font_size=192, font_weight=None, stroke_radius=None,
-                   stroke_fill=None):
+                   font_size=192, font_weight=None, stroke_radius=None):
     '''
     Adapted from FreeType-py's example code 
     
@@ -193,14 +193,7 @@ def render_lt_text(text, font_file_path, transform_param=None,
         pen.x += face.glyph.advance.x
         pen.y += face.glyph.advance.y 
     
-    img = Image.fromarray(np.invert(L)).convert("RGB")
-    # change the fill color of text stroke
-    if stroke_fill is not None:
-        assert len(stroke_fill) == 3, "stroke_fill must be a iterable of length 3."
-        img = np.array(img)
-        black_areas = (img[:, :, 0] == 0) & (img[:, :, 1] == 0) & (img[:, :, 2] == 0)
-        img[black_areas, :] = stroke_fill 
-        img = Image.fromarray(img) 
+    img = Image.fromarray(np.invert(L)).convert("RGB") 
     return img, Image.fromarray(L)  
 
 

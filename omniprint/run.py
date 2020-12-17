@@ -62,6 +62,28 @@ def parse_perspective_transform(x):
 	else:
 		raise Exception("The length of --perspective_transform must be 8.")
 
+def parse_morphological_image_processing_iteration(x):
+	x = x.split(",") 
+	assert len(x) in [2, 3]
+	x_0 = int(x[0])
+	assert x_0 >= 1 
+	x_1 = int(x[1])
+	assert x_1 >= 1 
+	if len(x) == 2:
+		return x_0, x_1, None 
+	else:
+		return x_0, x_1, x[2] 
+
+def parse_morphological_image_processing(x):
+	x = x.split(",") 
+	assert len(x) in [1, 2]
+	x_0 = int(x[0])
+	assert x_0 >= 1 
+	if len(x) == 1:
+		return x_0, None 
+	else:
+		return x_0, x[1] 
+
 
 def parse_arguments():
 	"""
@@ -548,6 +570,160 @@ def parse_arguments():
 		"filter is not used before resizing. ",
 		default=None
 	)
+	parser.add_argument(
+		"-morphero",
+		"--morph_erosion",
+		type=parse_morphological_image_processing_iteration,
+		help="Morphological image processing - erosion. The argument must be a tuple " +\
+		"separated by comma without space, the first element is the kernel " +\
+		"size, the second element is the number of iterations. For example, 3,2 means " +\
+		"kernel_size=3x3, iterations=2. 3,2,ellipse (3,2,cross) means using " +\
+		"elliptical (cross-shaped) kernel respectively. If the third argument is not given, " +\
+		"the default kernel shape will be rectangle. ",
+		default=None
+	)
+	parser.add_argument(
+		"-rmorphero",
+		"--random_morph_erosion",
+		action="store_true",
+		help="Uniformly sample the value of morphological erosion, the parameter " +\
+		"--morph_erosion needs to be set. " +\
+		"The range is [1, kernel_size] ([1, iterations]) " +\
+		"kernel_shape is randomly chosen among [rectangle, ellipse, cross].",  
+		default=False
+	)
+	parser.add_argument(
+		"-morphdil",
+		"--morph_dilation",
+		type=parse_morphological_image_processing_iteration,
+		help="Morphological image processing - dilation. The argument must be a tuple " +\
+		"separated by comma without space, the first element is the kernel " +\
+		"size, the second element is the number of iterations. For example, 3,2 means " +\
+		"kernel_size=3x3, iterations=2. 3,2,ellipse (3,2,cross) means using " +\
+		"elliptical (cross-shaped) kernel respectively. If the third argument is not given, " +\
+		"the default kernel shape will be rectangle. ",
+		default=None
+	)
+	parser.add_argument(
+		"-rmorphdil",
+		"--random_morph_dilation",
+		action="store_true",
+		help="Uniformly sample the value of morphological dilation, the parameter " +\
+		"--morph_dilation needs to be set. " +\
+		"The range is [1, kernel_size] ([1, iterations]) " +\
+		"kernel_shape is randomly chosen among [rectangle, ellipse, cross].", 
+		default=False
+	)
+	parser.add_argument(
+		"-morphope",
+		"--morhp_opening",
+		type=parse_morphological_image_processing,
+		help="Morphological image processing - opening. The argument must be a tuple " +\
+		"separated by comma without space, the first element is the kernel " +\
+		"size, the second element is the kernel shape. For example, 3 means " +\
+		"kernel_size=3x3. 3,ellipse (3,cross) means using " +\
+		"elliptical (cross-shaped) kernel respectively. If the second argument is not given, " +\
+		"the default kernel shape will be rectangle. ",
+		default=None
+	)
+	parser.add_argument(
+		"-rmorphope",
+		"--random_morph_opening",
+		action="store_true",
+		help="Uniformly sample the value of morphological opening, the parameter " +\
+		"--morph_opening needs to be set. " +\
+		"The range is [1, kernel_size] " +\
+		"kernel_shape is randomly chosen among [rectangle, ellipse, cross].",  
+		default=False
+	)
+	parser.add_argument(
+		"-morphclo",
+		"--morhp_closing",
+		type=parse_morphological_image_processing,
+		help="Morphological image processing - closing. The argument must be a tuple " +\
+		"separated by comma without space, the first element is the kernel " +\
+		"size, the second element is the kernel shape. For example, 3 means " +\
+		"kernel_size=3x3. 3,ellipse (3,cross) means using " +\
+		"elliptical (cross-shaped) kernel respectively. If the second argument is not given, " +\
+		"the default kernel shape will be rectangle. ",
+		default=None
+	)
+	parser.add_argument(
+		"-rmorphclo",
+		"--random_morph_closing",
+		action="store_true",
+		help="Uniformly sample the value of morphological closing, the parameter " +\
+		"--morph_closing needs to be set. " +\
+		"The range is [1, kernel_size] " +\
+		"kernel_shape is randomly chosen among [rectangle, ellipse, cross].",  
+		default=False
+	)
+	parser.add_argument(
+		"-morphgra",
+		"--morhp_gradient",
+		type=parse_morphological_image_processing,
+		help="Morphological image processing - gradient. The argument must be a tuple " +\
+		"separated by comma without space, the first element is the kernel " +\
+		"size, the second element is the kernel shape. For example, 3 means " +\
+		"kernel_size=3x3. 3,ellipse (3,cross) means using " +\
+		"elliptical (cross-shaped) kernel respectively. If the second argument is not given, " +\
+		"the default kernel shape will be rectangle. ",
+		default=None
+	)
+	parser.add_argument(
+		"-rmorphgra",
+		"--random_morph_gradient",
+		action="store_true",
+		help="Uniformly sample the value of morphological gradient, the parameter " +\
+		"--morph_gradient needs to be set. " +\
+		"The range is [1, kernel_size] " +\
+		"kernel_shape is randomly chosen among [rectangle, ellipse, cross].",  
+		default=False
+	)
+	parser.add_argument(
+		"-morphtoph",
+		"--morhp_tophat",
+		type=parse_morphological_image_processing,
+		help="Morphological image processing - Top Hat. The argument must be a tuple " +\
+		"separated by comma without space, the first element is the kernel " +\
+		"size, the second element is the kernel shape. For example, 3 means " +\
+		"kernel_size=3x3. 3,ellipse (3,cross) means using " +\
+		"elliptical (cross-shaped) kernel respectively. If the second argument is not given, " +\
+		"the default kernel shape will be rectangle. ",
+		default=None
+	)
+	parser.add_argument(
+		"-rmorphtoph",
+		"--random_morph_tophat",
+		action="store_true",
+		help="Uniformly sample the value of morphological tophat, the parameter " +\
+		"--morph_tophat needs to be set. " +\
+		"The range is [1, kernel_size] " +\
+		"kernel_shape is randomly chosen among [rectangle, ellipse, cross].",  
+		default=False
+	)
+	parser.add_argument(
+		"-morphblah",
+		"--morhp_blackhat",
+		type=parse_morphological_image_processing,
+		help="Morphological image processing - Black Hat. The argument must be a tuple " +\
+		"separated by comma without space, the first element is the kernel " +\
+		"size, the second element is the kernel shape. For example, 3 means " +\
+		"kernel_size=3x3. 3,ellipse (3,cross) means using " +\
+		"elliptical (cross-shaped) kernel respectively. If the second argument is not given, " +\
+		"the default kernel shape will be rectangle. ",
+		default=None
+	)
+	parser.add_argument(
+		"-rmorphblah",
+		"--random_morph_blackhat",
+		action="store_true",
+		help="Uniformly sample the value of morphological blackhat, the parameter " +\
+		"--morph_blackhat needs to be set. " +\
+		"The range is [1, kernel_size] " +\
+		"kernel_shape is randomly chosen among [rectangle, ellipse, cross].", 
+		default=False
+	)
 	return parser.parse_args()
 
 
@@ -696,15 +872,7 @@ def main():
 		external_dataframes = None 
 	generate_label_dataframe(labels, external_dataframes, save_path=output_label_dir)
 
-	"""
-	if args.name_format == 2:
-		# Create file with filename-to-label connections
-		with open(os.path.join(args.output_dir, "labels.txt"), "w", encoding="utf8") as f:
-			for i in range(string_count):
-				file_name = str(i) + "." + args.extension
-				f.write("{} {}\n".format(file_name, strings[i]))
-	"""
-
+	
 def func(args):
     return args[0] * 2
 
