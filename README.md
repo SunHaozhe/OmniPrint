@@ -34,19 +34,24 @@ usage: run.py [-h] [--output_dir [OUTPUT_DIR]] [-i [INPUT_FILE]]
               [-l [LANGUAGE]] -c [COUNT] [-rs] [-let] [-num] [-sym]
               [-w [LENGTH]] [-r] [-s [SIZE]] [-p [NB_PROCESSES]]
               [-e [EXTENSION]] [-wk] [-bl [BLUR]] [-rbl] [-b [BACKGROUND]]
-              [-hw] [-na NAME_FORMAT] [-om OUTPUT_MASK] [-d [DISTORSION]]
-              [-do [DISTORSION_ORIENTATION]] [-m [MARGINS]] [-ft [FONT]]
-              [-fd [FONT_DIR]] [-fidx [FONT_INDEX]] [-id [IMAGE_DIR]]
-              [-ca [CASE]] [-dt [DICT]] [-fwt [FONT_WEIGHT]]
-              [-stf [STROKE_FILL]] [-im [IMAGE_MODE]] [-rsd RANDOM_SEED]
-              [-esl] [-otlwd OUTLINE_WIDTH] [-fsz FONT_SIZE]
-              [-lt [LINEAR_TRANSFORM]] [-rtn [ROTATION]] [-rrtn]
-              [-shrx [SHEAR_X]] [-rshrx] [-shry [SHEAR_Y]] [-rshry]
+              [-hw] [-om] [-d [DISTORSION]] [-do [DISTORSION_ORIENTATION]]
+              [-m [MARGINS]] [-ft [FONT]] [-fd [FONT_DIR]]
+              [-fidx [FONT_INDEX]] [-id [IMAGE_DIR]] [-ca [CASE]] [-dt [DICT]]
+              [-fwt [FONT_WEIGHT]] [-stf [STROKE_FILL]] [-im [IMAGE_MODE]]
+              [-rsd RANDOM_SEED] [-esl] [-otlwd OUTLINE_WIDTH]
+              [-fsz FONT_SIZE] [-lt [LINEAR_TRANSFORM]] [-rtn [ROTATION]]
+              [-rrtn] [-shrx [SHEAR_X]] [-rshrx] [-shry [SHEAR_Y]] [-rshry]
               [-sclx [SCALE_X]] [-rsclx] [-scly [SCALE_Y]] [-rscly]
               [-alpha [ALPHA]] [-ralpha] [-beta [BETA]] [-rbeta]
               [-gamma [GAMMA]] [-rgamma] [-delta [DELTA]] [-rdelta] [-rtslnx]
               [-rtslny] [-pt [PERSPECTIVE_TRANSFORM]]
               [-rpt [RANDOM_PERSPECTIVE_TRANSFORM]]
+              [-gpr GAUSSIAN_PRIOR_RESIZING] [-morphero MORPH_EROSION]
+              [-rmorphero] [-morphdil MORPH_DILATION] [-rmorphdil]
+              [-morphope MORHP_OPENING] [-rmorphope] [-morphclo MORHP_CLOSING]
+              [-rmorphclo] [-morphgra MORHP_GRADIENT] [-rmorphgra]
+              [-morphtoph MORHP_TOPHAT] [-rmorphtoph]
+              [-morphblah MORHP_BLACKHAT] [-rmorphblah]
 
 Generate synthetic text data for text recognition.
 
@@ -96,19 +101,14 @@ optional arguments:
                         using this paremeter ignores -r, -n, -s
   -bl [BLUR], --blur [BLUR]
                         Apply gaussian blur to the resulting sample. Should be
-                        an integer defining the blur radius
+                        an integer defining the blur radius, 0 by default.
   -rbl, --random_blur   When set, the blur radius will be randomized between 0
                         and -bl.
   -b [BACKGROUND], --background [BACKGROUND]
                         Define what kind of background to use. 0: Gaussian
                         Noise, 1: Plain white, 2: Quasicrystal, 3: Image
   -hw, --handwritten    Define if the data will be "handwritten" by an RNN
-  -na NAME_FORMAT, --name_format NAME_FORMAT
-                        Define how the produced files will be named. 0:
-                        [TEXT]_[ID].[EXT], 1: [ID]_[TEXT].[EXT] 2: [ID].[EXT]
-                        + one file labels.txt containing id-to-label mappings
-  -om OUTPUT_MASK, --output_mask OUTPUT_MASK
-                        Define if the generator will return masks for the text
+  -om, --output_mask    Define if the generator will return masks for the text
   -d [DISTORSION], --distorsion [DISTORSION]
                         Define a distorsion applied to the resulting image. 0:
                         None (Default), 1: Sine wave, 2: Cosine wave, 3:
@@ -268,6 +268,114 @@ optional arguments:
                         --random_perspective_transform. If this option is
                         present but not followed by a command-line argument,
                         the standard deviation 0.05 will be used by default.
+  -gpr GAUSSIAN_PRIOR_RESIZING, --gaussian_prior_resizing GAUSSIAN_PRIOR_RESIZING
+                        If not None, apply Gaussian filter to smooth image
+                        prior to resizing, the argument of this parameter
+                        needs to be a float, which will be used as the
+                        standard deviation of Gaussian filter. Default is
+                        None, which means Gaussian filter is not used before
+                        resizing.
+  -morphero MORPH_EROSION, --morph_erosion MORPH_EROSION
+                        Morphological image processing - erosion. The argument
+                        must be a tuple separated by comma without space, the
+                        first element is the kernel size, the second element
+                        is the number of iterations. For example, 3,2 means
+                        kernel_size=3x3, iterations=2. 3,2,ellipse (3,2,cross)
+                        means using elliptical (cross-shaped) kernel
+                        respectively. If the third argument is not given, the
+                        default kernel shape will be rectangle.
+  -rmorphero, --random_morph_erosion
+                        Uniformly sample the value of morphological erosion,
+                        the parameter --morph_erosion needs to be set. The
+                        range is [1, kernel_size] ([1, iterations])
+                        kernel_shape is randomly chosen among [rectangle,
+                        ellipse, cross].
+  -morphdil MORPH_DILATION, --morph_dilation MORPH_DILATION
+                        Morphological image processing - dilation. The
+                        argument must be a tuple separated by comma without
+                        space, the first element is the kernel size, the
+                        second element is the number of iterations. For
+                        example, 3,2 means kernel_size=3x3, iterations=2.
+                        3,2,ellipse (3,2,cross) means using elliptical (cross-
+                        shaped) kernel respectively. If the third argument is
+                        not given, the default kernel shape will be rectangle.
+  -rmorphdil, --random_morph_dilation
+                        Uniformly sample the value of morphological dilation,
+                        the parameter --morph_dilation needs to be set. The
+                        range is [1, kernel_size] ([1, iterations])
+                        kernel_shape is randomly chosen among [rectangle,
+                        ellipse, cross].
+  -morphope MORHP_OPENING, --morhp_opening MORHP_OPENING
+                        Morphological image processing - opening. The argument
+                        must be a tuple separated by comma without space, the
+                        first element is the kernel size, the second element
+                        is the kernel shape. For example, 3 means
+                        kernel_size=3x3. 3,ellipse (3,cross) means using
+                        elliptical (cross-shaped) kernel respectively. If the
+                        second argument is not given, the default kernel shape
+                        will be rectangle.
+  -rmorphope, --random_morph_opening
+                        Uniformly sample the value of morphological opening,
+                        the parameter --morph_opening needs to be set. The
+                        range is [1, kernel_size] kernel_shape is randomly
+                        chosen among [rectangle, ellipse, cross].
+  -morphclo MORHP_CLOSING, --morhp_closing MORHP_CLOSING
+                        Morphological image processing - closing. The argument
+                        must be a tuple separated by comma without space, the
+                        first element is the kernel size, the second element
+                        is the kernel shape. For example, 3 means
+                        kernel_size=3x3. 3,ellipse (3,cross) means using
+                        elliptical (cross-shaped) kernel respectively. If the
+                        second argument is not given, the default kernel shape
+                        will be rectangle.
+  -rmorphclo, --random_morph_closing
+                        Uniformly sample the value of morphological closing,
+                        the parameter --morph_closing needs to be set. The
+                        range is [1, kernel_size] kernel_shape is randomly
+                        chosen among [rectangle, ellipse, cross].
+  -morphgra MORHP_GRADIENT, --morhp_gradient MORHP_GRADIENT
+                        Morphological image processing - gradient. The
+                        argument must be a tuple separated by comma without
+                        space, the first element is the kernel size, the
+                        second element is the kernel shape. For example, 3
+                        means kernel_size=3x3. 3,ellipse (3,cross) means using
+                        elliptical (cross-shaped) kernel respectively. If the
+                        second argument is not given, the default kernel shape
+                        will be rectangle.
+  -rmorphgra, --random_morph_gradient
+                        Uniformly sample the value of morphological gradient,
+                        the parameter --morph_gradient needs to be set. The
+                        range is [1, kernel_size] kernel_shape is randomly
+                        chosen among [rectangle, ellipse, cross].
+  -morphtoph MORHP_TOPHAT, --morhp_tophat MORHP_TOPHAT
+                        Morphological image processing - Top Hat. The argument
+                        must be a tuple separated by comma without space, the
+                        first element is the kernel size, the second element
+                        is the kernel shape. For example, 3 means
+                        kernel_size=3x3. 3,ellipse (3,cross) means using
+                        elliptical (cross-shaped) kernel respectively. If the
+                        second argument is not given, the default kernel shape
+                        will be rectangle.
+  -rmorphtoph, --random_morph_tophat
+                        Uniformly sample the value of morphological tophat,
+                        the parameter --morph_tophat needs to be set. The
+                        range is [1, kernel_size] kernel_shape is randomly
+                        chosen among [rectangle, ellipse, cross].
+  -morphblah MORHP_BLACKHAT, --morhp_blackhat MORHP_BLACKHAT
+                        Morphological image processing - Black Hat. The
+                        argument must be a tuple separated by comma without
+                        space, the first element is the kernel size, the
+                        second element is the kernel shape. For example, 3
+                        means kernel_size=3x3. 3,ellipse (3,cross) means using
+                        elliptical (cross-shaped) kernel respectively. If the
+                        second argument is not given, the default kernel shape
+                        will be rectangle.
+  -rmorphblah, --random_morph_blackhat
+                        Uniformly sample the value of morphological blackhat,
+                        the parameter --morph_blackhat needs to be set. The
+                        range is [1, kernel_size] kernel_shape is randomly
+                        chosen among [rectangle, ellipse, cross].
+
 ```
 
 
