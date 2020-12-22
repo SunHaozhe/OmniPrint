@@ -1,6 +1,10 @@
 # OmniPrint 
 
 
+
+README not ready yet...
+
+
 A synthetic data generator for text recognition
 
 
@@ -375,7 +379,6 @@ optional arguments:
                         the parameter --morph_blackhat needs to be set. The
                         range is [1, kernel_size] kernel_shape is randomly
                         chosen among [rectangle, ellipse, cross].
-
 ```
 
 
@@ -389,24 +392,15 @@ By default, generated images will be stored to `out/` in the current working dir
 
 ### Text rotation
 
-What if you want random rotation? Add `-rtn` and `-rrtn` (`python3 run.py -c 1000 --size 64 -rtn 5 -rrtn`)
-
-
-### Text distortion
-You can also add distorsion to the generated text with `-d` and `-do`
+Add `-rtn` and `-rrtn` (`python3 run.py -c 1000 --size 64 -rtn 5 -rrtn`)
 
 
 ### Text blurring
 
-But scanned document usually aren't that clear are they? Add `-bl` and `-rbl` to get gaussian blur on the generated image with user-defined radius (here 0, 1, 2, 4):
+Add `-bl` and `-rbl` to get gaussian blur on the generated image with user-defined radius (here 0, 1, 2, 4):
 
 
 ### Background
-
-
-
-### Dictionary
-
 
 
 
@@ -420,7 +414,7 @@ Number of images generated per second.
 
 Test command: 
 ```python
-python3 run.py --count 1000 --size 32 --ensure_square_layout --image_mode L --dict alphabets/fine/basic_latin_lowercase --font_index prepare_fonts/fonts/basic_latin_lowercase
+python3 run.py --count 1000 --size 32 --ensure_square_layout --image_mode L --dict alphabets/fine/basic_latin_lowercase --font_index fonts/basic_latin_lowercase
 ```
 
 - 2.7 GHz Dual-Core Intel Core i5 + SSD 
