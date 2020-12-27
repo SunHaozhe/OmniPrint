@@ -122,16 +122,16 @@ class TextDataGenerator(object):
                     label["{}_kernel_shape".format(morph_operation)] = kernel_shape 
                     label["{}_iterations".format(morph_operation)] = iterations 
 
-            morph_operations = zip(["morhp_opening",
-                                    "morhp_closing",
-                                    "morhp_gradient",
-                                    "morhp_tophat",
-                                    "morhp_blackhat"], 
-                                   [transforms.morhp_opening_transform,
-                                    transforms.morhp_closing_transform,
-                                    transforms.morhp_gradient_transform,
-                                    transforms.morhp_tophat_transform,
-                                    transforms.morhp_blackhat_transform])
+            morph_operations = zip(["morph_opening",
+                                    "morph_closing",
+                                    "morph_gradient",
+                                    "morph_tophat",
+                                    "morph_blackhat"], 
+                                   [transforms.morph_opening_transform,
+                                    transforms.morph_closing_transform,
+                                    transforms.morph_gradient_transform,
+                                    transforms.morph_tophat_transform,
+                                    transforms.morph_blackhat_transform])
             for morph_operation, morph_func in morph_operations:
                 if args.get(morph_operation) is not None: 
                     kernel_size, kernel_shape = args.get(morph_operation) 

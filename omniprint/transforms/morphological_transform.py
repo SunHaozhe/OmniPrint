@@ -62,7 +62,7 @@ def morph_dilation_transform(img, mask, kernel_size=2, iterations=1, kernel_shap
 	return img, mask
 
 
-def morhp_opening_transform(img, mask, kernel_size=2, kernel_shape=None):
+def morph_opening_transform(img, mask, kernel_size=2, kernel_shape=None):
 	"""
 	Opening is just another name of erosion followed by dilation. 
 	It is useful in removing noise.
@@ -88,7 +88,7 @@ def morhp_opening_transform(img, mask, kernel_size=2, kernel_shape=None):
 	return img, mask
 
 
-def morhp_closing_transform(img, mask, kernel_size=2, kernel_shape=None):
+def morph_closing_transform(img, mask, kernel_size=2, kernel_shape=None):
 	"""
 	Closing is reverse of Opening, Dilation followed by Erosion. It is useful in closing 
 	small holes inside the foreground objects, or small black points on the object.
@@ -114,7 +114,7 @@ def morhp_closing_transform(img, mask, kernel_size=2, kernel_shape=None):
 	return img, mask
 
 
-def morhp_gradient_transform(img, mask, kernel_size=2, kernel_shape=None):
+def morph_gradient_transform(img, mask, kernel_size=2, kernel_shape=None):
 	"""
 	Morphological Gradient is the difference between dilation and erosion of an image. 
 
@@ -139,7 +139,7 @@ def morhp_gradient_transform(img, mask, kernel_size=2, kernel_shape=None):
 	return img, mask
 
 
-def morhp_tophat_transform(img, mask, kernel_size=2, kernel_shape=None):
+def morph_tophat_transform(img, mask, kernel_size=2, kernel_shape=None):
 	"""
 	Top Hat is the difference between input image and Opening of the image. 
 
@@ -164,7 +164,7 @@ def morhp_tophat_transform(img, mask, kernel_size=2, kernel_shape=None):
 	return img, mask
 
 
-def morhp_blackhat_transform(img, mask, kernel_size=2, kernel_shape=None):
+def morph_blackhat_transform(img, mask, kernel_size=2, kernel_shape=None):
 	"""
 	Black Hat is the difference between the closing of the input image and input image. 
 
