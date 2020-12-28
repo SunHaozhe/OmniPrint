@@ -100,7 +100,7 @@ def AutoML_format(dataset_name, raw_dataset_path, label_name, image_format="png"
 		public_info.append("target_num={}".format(len(label_names)))
 		public_info.append("label_num={}".format(len(label_names)))
 	public_info.append("feat_type='Numerical'")
-	public_info.append("feat_num='{}'".format(data_matrix.shape[1]))
+	public_info.append("feat_num={}".format(data_matrix.shape[1]))
 	public_info.append("is_sparse=0")
 	public_info.append("time_budget=500") # maximum of this version of Chalab
 	with open(os.path.join(output_dir, "{}_public.info".format(dataset_name)), "w") as f:
