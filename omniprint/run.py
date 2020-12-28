@@ -95,71 +95,12 @@ def parse_arguments():
 	)
 	parser.add_argument("--output_dir", type=str, nargs="?", help="The output directory", default="out")
 	parser.add_argument(
-		"-i",
-		"--input_file",
-		type=str,
-		nargs="?",
-		help="When set, this argument uses a specified text file as source for the text",
-		default="",
-	)
-	parser.add_argument(
-		"-l",
-		"--language",
-		type=str,
-		nargs="?",
-		help="The language to use, should be fr (French), en (English), es (Spanish), de (German), ar (Arabic), cn (Chinese), or hi (Hindi)",
-		default="en",
-	)
-	parser.add_argument(
 		"-c",
 		"--count",
 		type=int,
 		nargs="?",
 		help="The number of images to be created.",
 		required=True,
-	)
-	parser.add_argument(
-		"-rs",
-		"--random_sequences",
-		action="store_true",
-		help="Use random sequences as the source text for the generation. Set '-let','-num','-sym' to use letters/numbers/symbols. If none specified, using all three.",
-		default=False,
-	)
-	parser.add_argument(
-		"-let",
-		"--include_letters",
-		action="store_true",
-		help="Define if random sequences should contain letters. Only works with -rs",
-		default=False,
-	)
-	parser.add_argument(
-		"-num",
-		"--include_numbers",
-		action="store_true",
-		help="Define if random sequences should contain numbers. Only works with -rs",
-		default=False,
-	)
-	parser.add_argument(
-		"-sym",
-		"--include_symbols",
-		action="store_true",
-		help="Define if random sequences should contain symbols. Only works with -rs",
-		default=False,
-	)
-	parser.add_argument(
-		"-w",
-		"--length",
-		type=int,
-		nargs="?",
-		help="Define how many words should be included in each generated sample. If the text source is Wikipedia, this is the MINIMUM length",
-		default=1,
-	)
-	parser.add_argument(
-		"-r",
-		"--random",
-		action="store_true",
-		help="Define if the produced string will have variable word count (with --length being the maximum)",
-		default=False,
 	)
 	parser.add_argument(
 		"-s",
@@ -185,13 +126,6 @@ def parse_arguments():
 		nargs="?",
 		help="Define the extension to save the image with",
 		default="png",
-	)
-	parser.add_argument(
-		"-wk",
-		"--use_wikipedia",
-		action="store_true",
-		help="Use Wikipedia as the source text for the generation, using this paremeter ignores -r, -n, -s",
-		default=False,
 	)
 	parser.add_argument(
 		"-bl",
@@ -256,13 +190,6 @@ def parse_arguments():
 		nargs="?",
 		help="Define an image directory to use when background is set to image",
 		default=os.path.join(os.path.split(os.path.realpath(__file__))[0], "images"),
-	)
-	parser.add_argument(
-		"-ca",
-		"--case",
-		type=str,
-		nargs="?",
-		help="Generate upper or lowercase only. arguments: upper or lower. Example: --case upper",
 	)
 	parser.add_argument(
 		"-dt", "--dict", type=str, nargs="?", help="Define the dictionary to be used"
@@ -742,7 +669,7 @@ def main():
 		else:
 			sys.exit("Cannot open dict")
 	else:
-		lang_dict = load_dict(args.language)
+		raise NotImplementedError 
 
 	# Creating font (path) list
 	if args.font_index:
@@ -772,47 +699,13 @@ def main():
 		else:
 			sys.exit("Cannot open font")
 	else:
-		fonts = load_fonts(args.language)
+		raise NotImplementedError 
 
 	# Creating synthetic sentences (or word)
-	strings = []
-
-	if args.use_wikipedia:
-		strings = create_strings_from_wikipedia(args.length, args.count, args.language)
-	elif args.input_file != "":
-		strings = create_strings_from_file(args.input_file, args.count)
-	elif args.random_sequences:
-		strings = create_strings_randomly(
-			args.length,
-			args.random,
-			args.count,
-			args.include_letters,
-			args.include_numbers,
-			args.include_symbols,
-			args.language,
-		)
-		# Set a name format compatible with special characters automatically if they are used
-		if args.include_symbols or True not in (
-			args.include_letters,
-			args.include_numbers,
-			args.include_symbols,
-		):
-			args.name_format = 2
-	else:
-		strings = create_strings_from_dict(args.length, args.random, args.count, lang_dict)
-
-	if args.language == "ar":
-		from arabic_reshaper import ArabicReshaper
-
-		arabic_reshaper = ArabicReshaper()
-		strings = [" ".join([arabic_reshaper.reshape(w) for w in s.split(" ")[::-1]]) for s in strings]
-	if args.case == "upper":
-		strings = [x.upper() for x in strings]
-	if args.case == "lower":
-		strings = [x.lower() for x in strings]
-
-	# determine fonts for each image 
+	strings = create_strings_from_dict(1, False, args.count, lang_dict)
 	string_count = len(strings) 
+	
+	# determine fonts for each image 
 	sampled_fonts = [fonts[random.randrange(0, len(fonts))] for _ in range(0, string_count)]
 
 	# determine the number of processes to use 

@@ -34,20 +34,19 @@ python3 run.py --count 10
 ```
 
 ```
-usage: run.py [-h] [--output_dir [OUTPUT_DIR]] [-i [INPUT_FILE]]
-              [-l [LANGUAGE]] -c [COUNT] [-rs] [-let] [-num] [-sym]
-              [-w [LENGTH]] [-r] [-s [SIZE]] [-p [NB_PROCESSES]]
-              [-e [EXTENSION]] [-wk] [-bl [BLUR]] [-rbl] [-b [BACKGROUND]]
-              [-om] [-m [MARGINS]] [-ft [FONT]] [-fd [FONT_DIR]]
-              [-fidx [FONT_INDEX]] [-id [IMAGE_DIR]] [-ca [CASE]] [-dt [DICT]]
-              [-fwt [FONT_WEIGHT]] [-stf [STROKE_FILL]] [-im [IMAGE_MODE]]
-              [-rsd RANDOM_SEED] [-esl] [-otlwd OUTLINE_WIDTH]
-              [-fsz FONT_SIZE] [-lt [LINEAR_TRANSFORM]] [-rtn [ROTATION]]
-              [-rrtn] [-shrx [SHEAR_X]] [-rshrx] [-shry [SHEAR_Y]] [-rshry]
-              [-sclx [SCALE_X]] [-rsclx] [-scly [SCALE_Y]] [-rscly]
-              [-alpha [ALPHA]] [-ralpha] [-beta [BETA]] [-rbeta]
-              [-gamma [GAMMA]] [-rgamma] [-delta [DELTA]] [-rdelta] [-rtslnx]
-              [-rtslny] [-pt [PERSPECTIVE_TRANSFORM]]
+usage: run.py [-h] [--output_dir [OUTPUT_DIR]] -c [COUNT] [-s [SIZE]]
+              [-p [NB_PROCESSES]] [-e [EXTENSION]] [-bl [BLUR]] [-rbl]
+              [-b [BACKGROUND]] [-om] [-m [MARGINS]] [-ft [FONT]]
+              [-fd [FONT_DIR]] [-fidx [FONT_INDEX]] [-id [IMAGE_DIR]]
+              [-dt [DICT]] [-fwt [FONT_WEIGHT]] [-rfwt] [-stf [STROKE_FILL]]
+              [-rstf] [-im [IMAGE_MODE]] [-rsd RANDOM_SEED] [-esl]
+              [-otlwd OUTLINE_WIDTH] [-fsz FONT_SIZE] [-lt [LINEAR_TRANSFORM]]
+              [-rtn [ROTATION]] [-rrtn] [-shrx [SHEAR_X]] [-rshrx]
+              [-shry [SHEAR_Y]] [-rshry] [-sclx [SCALE_X]] [-rsclx]
+              [-scly [SCALE_Y]] [-rscly] [-alpha [ALPHA]] [-ralpha]
+              [-beta [BETA]] [-rbeta] [-gamma [GAMMA]] [-rgamma]
+              [-delta [DELTA]] [-rdelta] [-rtslnx] [-rtslny]
+              [-pt [PERSPECTIVE_TRANSFORM]]
               [-rpt [RANDOM_PERSPECTIVE_TRANSFORM]]
               [-gpr GAUSSIAN_PRIOR_RESIZING] [-morphero MORPH_EROSION]
               [-rmorphero] [-morphdil MORPH_DILATION] [-rmorphdil]
@@ -62,35 +61,8 @@ optional arguments:
   -h, --help            show this help message and exit
   --output_dir [OUTPUT_DIR]
                         The output directory
-  -i [INPUT_FILE], --input_file [INPUT_FILE]
-                        When set, this argument uses a specified text file as
-                        source for the text
-  -l [LANGUAGE], --language [LANGUAGE]
-                        The language to use, should be fr (French), en
-                        (English), es (Spanish), de (German), ar (Arabic), cn
-                        (Chinese), or hi (Hindi)
   -c [COUNT], --count [COUNT]
                         The number of images to be created.
-  -rs, --random_sequences
-                        Use random sequences as the source text for the
-                        generation. Set '-let','-num','-sym' to use
-                        letters/numbers/symbols. If none specified, using all
-                        three.
-  -let, --include_letters
-                        Define if random sequences should contain letters.
-                        Only works with -rs
-  -num, --include_numbers
-                        Define if random sequences should contain numbers.
-                        Only works with -rs
-  -sym, --include_symbols
-                        Define if random sequences should contain symbols.
-                        Only works with -rs
-  -w [LENGTH], --length [LENGTH]
-                        Define how many words should be included in each
-                        generated sample. If the text source is Wikipedia,
-                        this is the MINIMUM length
-  -r, --random          Define if the produced string will have variable word
-                        count (with --length being the maximum)
   -s [SIZE], --size [SIZE]
                         Define the height of the produced images if
                         horizontal, else the width
@@ -100,8 +72,6 @@ optional arguments:
                         of CPU cores
   -e [EXTENSION], --extension [EXTENSION]
                         Define the extension to save the image with
-  -wk, --use_wikipedia  Use Wikipedia as the source text for the generation,
-                        using this paremeter ignores -r, -n, -s
   -bl [BLUR], --blur [BLUR]
                         Apply gaussian blur to the resulting sample. Should be
                         an integer defining the blur radius, 0 by default.
@@ -124,15 +94,16 @@ optional arguments:
   -id [IMAGE_DIR], --image_dir [IMAGE_DIR]
                         Define an image directory to use when background is
                         set to image
-  -ca [CASE], --case [CASE]
-                        Generate upper or lowercase only. arguments: upper or
-                        lower. Example: --case upper
   -dt [DICT], --dict [DICT]
                         Define the dictionary to be used
   -fwt [FONT_WEIGHT], --font_weight [FONT_WEIGHT]
                         Define the width of the strokes
+  -rfwt, --random_font_weight
+                        Use random font weight (stroke width).
   -stf [STROKE_FILL], --stroke_fill [STROKE_FILL]
                         Define the color of the strokes
+  -rstf, --random_stroke_fill
+                        Use random color to fill strokes.
   -im [IMAGE_MODE], --image_mode [IMAGE_MODE]
                         Define the image mode to be used. RGB is default, L
                         means 8-bit grayscale images, 1 means 1-bit binary
