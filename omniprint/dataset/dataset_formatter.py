@@ -3,11 +3,14 @@ import glob
 import numpy as np 
 import pandas as pd 
 from PIL import Image
+import shutil
 
 
 def AutoML_format(dataset_name, raw_dataset_path, label_name, image_format="png", 
 				 is_regression=False, output_dir="datasets"):
 	"""
+	AutoML format
+
 	https://github.com/codalab/chalab/wiki/Help:-Wizard-%E2%80%90-Challenge-%E2%80%90-Data
 
 	Currently, only regression and multiclass classification 
@@ -22,13 +25,14 @@ def AutoML_format(dataset_name, raw_dataset_path, label_name, image_format="png"
 		raise Exception("Raw dataset not found, please check the path.")
 
 	output_dir = os.path.join(output_dir, dataset_name)
-	if not os.path.exists(output_dir):
-	    os.makedirs(output_dir) 
+	if os.path.exists(output_dir):
+		shutil.rmtree(output_dir) 
+	os.makedirs(output_dir) 
 
 	# DataName.data
 	data_matrix = []
 	for path in sorted(glob.glob(os.path.join(raw_dataset_path, 
-											  "data", "*.{}".format(image_format)))):
+											  "data", "*.{}".format(image_format))), key=_sort_file):
 		img = np.array(Image.open(path)).ravel()
 		data_matrix.append(img)
 	data_matrix = np.vstack(data_matrix) 
@@ -107,7 +111,75 @@ def AutoML_format(dataset_name, raw_dataset_path, label_name, image_format="png"
 		f.write("\n".join(public_info)) 
 	
 
+def File_format(dataset_name, raw_dataset_path, label_name, image_format="png", 
+				is_regression=False, output_dir="datasets"):
+	"""
+	File format 
 
+	https://github.com/zhengying-liu/autodl-contrib/tree/master/file_format
+	
+	Currently, only (multiclass) classification task is supported. 
+
+	raw_dataset_path:
+		For example, out/20201203_161302_297288 
+	image_format:
+		png, jpg, etc. 
+	""" 
+	if is_regression:
+		raise Exception("File format does not support regression task.")
+
+	if not os.path.exists(raw_dataset_path):
+		raise Exception("Raw dataset not found, please check the path.")
+
+	output_dir = os.path.join(output_dir, dataset_name)
+	if os.path.exists(output_dir):
+		shutil.rmtree(output_dir) 
+	os.makedirs(output_dir) 
+
+	# data
+	file_names = []
+	for path in sorted(glob.glob(os.path.join(raw_dataset_path, 
+								 "data", "*.{}".format(image_format))), key=_sort_file):
+		file_names.append(os.path.basename(path))
+		shutil.copy(path, output_dir) 
+	file_name_dict = {}
+	for i, file_name in enumerate(file_names):
+		file_name_dict[file_name] = i 
+	for path in glob.glob(os.path.join(output_dir, "*.{}".format(image_format))):
+		new_file_name = "data_{}.{}".format(file_name_dict[os.path.basename(path)], 
+											image_format)
+		os.rename(path, os.path.join(os.path.dirname(path), new_file_name))
+
+	# labels.csv and label.name 
+	df = pd.read_csv(os.path.join(raw_dataset_path, "label", "raw_labels.csv"), 
+					 sep="\t", encoding="utf-8")
+	solution_vector = df.loc[:, label_name].tolist()
+
+	## substitute raw string labels to contiguous integer labels 
+	label_names = sorted(list(set(solution_vector)))
+	label_name_dict = {}
+	for i, label_name in enumerate(label_names):
+		label_name_dict[label_name] = i 
+	new_solution_vector = []
+	for x in solution_vector:
+		new_solution_vector.append(label_name_dict[x])
+	solution_vector = new_solution_vector 
+
+	## label.name 
+	with open(os.path.join(output_dir, "label.name"), "w") as f:
+		f.write("\n".join([str(x) for x in label_names]))
+	
+	## labels.csv 
+	df = [] 
+	for i, path in enumerate(sorted(glob.glob(os.path.join(output_dir, 
+									"*.{}".format(image_format))), key=_sort_file)):
+		df.append((os.path.basename(path), solution_vector[i]))
+	df = pd.DataFrame(df, columns=["FileName", "Labels"])
+	df.to_csv(os.path.join(output_dir, "labels.csv"), sep=",", encoding="utf-8")
+	
+
+def _sort_file(name):
+	return int(os.path.splitext(os.path.basename(name))[0].split("_")[-1])
 
 
 def _get_official_name(name):
