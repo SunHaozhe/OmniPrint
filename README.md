@@ -38,8 +38,7 @@ usage: run.py [-h] [--output_dir [OUTPUT_DIR]] [-i [INPUT_FILE]]
               [-l [LANGUAGE]] -c [COUNT] [-rs] [-let] [-num] [-sym]
               [-w [LENGTH]] [-r] [-s [SIZE]] [-p [NB_PROCESSES]]
               [-e [EXTENSION]] [-wk] [-bl [BLUR]] [-rbl] [-b [BACKGROUND]]
-              [-hw] [-om] [-d [DISTORSION]] [-do [DISTORSION_ORIENTATION]]
-              [-m [MARGINS]] [-ft [FONT]] [-fd [FONT_DIR]]
+              [-om] [-m [MARGINS]] [-ft [FONT]] [-fd [FONT_DIR]]
               [-fidx [FONT_INDEX]] [-id [IMAGE_DIR]] [-ca [CASE]] [-dt [DICT]]
               [-fwt [FONT_WEIGHT]] [-stf [STROKE_FILL]] [-im [IMAGE_MODE]]
               [-rsd RANDOM_SEED] [-esl] [-otlwd OUTLINE_WIDTH]
@@ -111,16 +110,7 @@ optional arguments:
   -b [BACKGROUND], --background [BACKGROUND]
                         Define what kind of background to use. 0: Gaussian
                         Noise, 1: Plain white, 2: Quasicrystal, 3: Image
-  -hw, --handwritten    Define if the data will be "handwritten" by an RNN
   -om, --output_mask    Define if the generator will return masks for the text
-  -d [DISTORSION], --distorsion [DISTORSION]
-                        Define a distorsion applied to the resulting image. 0:
-                        None (Default), 1: Sine wave, 2: Cosine wave, 3:
-                        Random
-  -do [DISTORSION_ORIENTATION], --distorsion_orientation [DISTORSION_ORIENTATION]
-                        Define the distorsion's orientation. Only used if -d
-                        is specified. 0: Vertical (Up and down), 1: Horizontal
-                        (Left and Right), 2: Both
   -m [MARGINS], --margins [MARGINS]
                         Define the margins (percentage) around the text when
                         rendered. Each element should be a float

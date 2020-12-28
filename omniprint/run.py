@@ -218,33 +218,11 @@ def parse_arguments():
 		default=0,
 	)
 	parser.add_argument(
-		"-hw",
-		"--handwritten",
-		action="store_true",
-		help='Define if the data will be "handwritten" by an RNN',
-	)
-	parser.add_argument(
 		"-om",
 		"--output_mask",
 		action="store_true",
 		help="Define if the generator will return masks for the text",
 		default=False,
-	)
-	parser.add_argument(
-		"-d",
-		"--distorsion",
-		type=int,
-		nargs="?",
-		help="Define a distorsion applied to the resulting image. 0: None (Default), 1: Sine wave, 2: Cosine wave, 3: Random",
-		default=0,
-	)
-	parser.add_argument(
-		"-do",
-		"--distorsion_orientation",
-		type=int,
-		nargs="?",
-		help="Define the distorsion's orientation. Only used if -d is specified. 0: Vertical (Up and down), 1: Horizontal (Left and Right), 2: Both",
-		default=0,
 	)
 	parser.add_argument(
 		"-m",
@@ -872,9 +850,6 @@ def main():
 		external_dataframes = None 
 	generate_label_dataframe(labels, external_dataframes, save_path=output_label_dir)
 
-	
-def func(args):
-    return args[0] * 2
 
 
 if __name__ == "__main__":

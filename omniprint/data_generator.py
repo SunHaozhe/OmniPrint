@@ -7,14 +7,10 @@ import scipy
 import PIL
 from PIL import Image, ImageFilter
 
-from omniprint import freetype_text_generator, background_generator, distorsion_generator
+from omniprint import freetype_text_generator, background_generator
 import transforms
 from utils import fill_stroke_color 
 
-try:
-    from omniprint import handwritten_text_generator
-except ImportError as e:
-    print("Missing modules for handwritten text generation.")
 
 _high_level_lt_params = ["rotation", "shear_x", "shear_y", "scale_x", 
                          "scale_y", "alpha", "beta", "gamma", "delta"]
@@ -180,35 +176,6 @@ class TextDataGenerator(object):
             # collect labels
             label["perspective_params"] = perspective_params 
 
-
-        #############################
-        # Apply distorsion to image #
-        #############################
-        distorsion_type = args.get("distorsion")
-        distorsion_orientation = args.get("distorsion_orientation")
-        if distorsion_type == 0:
-            pass 
-        elif distorsion_type == 1:
-            img, mask = distorsion_generator.sin(
-                img,
-                mask,
-                vertical=(distorsion_orientation == 0 or distorsion_orientation == 2),
-                horizontal=(distorsion_orientation == 1 or distorsion_orientation == 2),
-            )
-        elif distorsion_type == 2:
-            img, mask = distorsion_generator.cos(
-                img,
-                mask,
-                vertical=(distorsion_orientation == 0 or distorsion_orientation == 2),
-                horizontal=(distorsion_orientation == 1 or distorsion_orientation == 2),
-            )
-        else:
-            img, mask = distorsion_generator.random(
-                img,
-                mask,
-                vertical=(distorsion_orientation == 0 or distorsion_orientation == 2),
-                horizontal=(distorsion_orientation == 1 or distorsion_orientation == 2),
-            )
 
         ##################################
         # Resize image to desired format #
