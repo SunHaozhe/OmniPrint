@@ -7,6 +7,7 @@ import glob
 import pandas as pd 
 import numpy as np 
 from PIL import Image 
+import fontTools.ttLib 
 
 
 def load_dict(lang):
@@ -114,6 +115,20 @@ def int2float_image(img):
         np.array of dtype uint8
     """ 
     return (np.clip(img, 0, 255) / 255).astype(np.float32)
+
+def get_font_weight_range(font_file_path):
+	try:
+		ttfont = fontTools.ttLib.TTFont(font_file_path) 
+		for axis in ttfont["fvar"].axes:
+			if axis.axisTag == "wght":
+				return axis.minValue, axis.maxValue 
+	except Exception:
+		return None, None 
+
+
+
+
+
 
 
 

@@ -22,6 +22,8 @@ class Parameters:
 	dict_ = "alphabets/fine/russian" # --dict (alphabet)
 	#font = "fonts/fonts/Osaka.ttf"
 	font_index = "fonts/russian" # -fidx
+	#font_index = "fonts/variable_weight_russian" # -fidx
+	#random_font_weight = True 
 	#dict_ = "alphabets/fine/basic_latin_lowercase" # --dict (alphabet)
 	#font_index = "prepare_fonts/fonts/basic_latin_lowercase" # -fidx
 	#nb_processes = 1 
@@ -35,6 +37,7 @@ class Parameters:
 	#random_perspective_transform = 0.05   
 	#gaussian_prior_resizing = 1 
 	#stroke_fill = "255,0,0"
+	#random_stroke_fill = True 
 	#morph_erosion = "3,5"
 	#random_morph_erosion = True 
 

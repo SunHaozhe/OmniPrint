@@ -9,7 +9,7 @@ from PIL import Image, ImageFilter
 
 from omniprint import freetype_text_generator, background_generator
 import transforms
-from utils import fill_stroke_color 
+from utils import fill_stroke_color, get_font_weight_range
 
 
 _high_level_lt_params = ["rotation", "shear_x", "shear_y", "scale_x", 
@@ -61,99 +61,105 @@ class TextDataGenerator(object):
         # Create image of text #
         ########################
 
-        if args.get("handwritten"):
-            if args.get("orientation") == 1:
-                raise ValueError("Vertical handwritten text is unavailable")
-            img, mask = handwritten_text_generator.generate(text, "#282828") # black 
+        transform_param = {}
+        if args.get("linear_transform") is not None:
+            transform_param = args.get("linear_transform") 
+            label["linear_transform"] = transform_param 
         else:
-            transform_param = {}
-            if args.get("linear_transform") is not None:
-                transform_param = args.get("linear_transform") 
-                label["linear_transform"] = transform_param 
-            else:
-                for lt_param_ in _high_level_lt_params:
-                    if args.get(lt_param_) is not None:
-                        transform_param[lt_param_] = args.get(lt_param_) 
-                for random_lt_param_ in _random_high_level_lt_params:
-                    if args.get(random_lt_param_):
-                        lt_param_ = random_lt_param_[7:] 
-                        limit_value = args.get(lt_param_) 
-                        assert limit_value is not None, "The range of parameter is required."
-                        limit_value = abs(limit_value) 
-                        transform_param[lt_param_] = random.uniform(- limit_value, limit_value) 
-
-                # collect labels
-                for lt_param_ in _high_level_lt_params:
-                    if args.get(lt_param_) is not None:
-                        label[lt_param_] = transform_param[lt_param_] 
-
-            img, mask = freetype_text_generator.render_lt_text(text, 
-                                                               font_file_path, 
-                                                               transform_param=transform_param, 
-                                                               font_size=args.get("font_size"), 
-                                                               font_weight=args.get("font_weight"), 
-                                                               stroke_radius=args.get("outline_width"))
-            
-
-            # morphological image processing, applied before color filling 
-            morph_operations = zip(["morph_erosion", 
-                                    "morph_dilation"], 
-                                   [transforms.morph_erosion_transform, 
-                                    transforms.morph_dilation_transform])
-            for morph_operation, morph_func in morph_operations:
-                if args.get(morph_operation) is not None:
-                    kernel_size, iterations, kernel_shape = args.get(morph_operation) 
-                    if args.get("random_{}".format(morph_operation)):
-                        kernel_size = np.random.randint(1, kernel_size + 1)
-                        iterations = np.random.randint(1, iterations + 1)
-                        kernel_shape = np.random.choice([None, "ellipse", "cross"], 
-                                                         size=None, replace=True)
-                    img, mask = morph_func(img, mask, 
-                                           kernel_size=kernel_size, 
-                                           iterations=iterations, 
-                                           kernel_shape=kernel_shape)
-                    label["{}_kernel_size".format(morph_operation)] = kernel_size
-                    if kernel_shape is None:
-                        kernel_shape = "rectangle"
-                    label["{}_kernel_shape".format(morph_operation)] = kernel_shape 
-                    label["{}_iterations".format(morph_operation)] = iterations 
-
-            morph_operations = zip(["morph_opening",
-                                    "morph_closing",
-                                    "morph_gradient",
-                                    "morph_tophat",
-                                    "morph_blackhat"], 
-                                   [transforms.morph_opening_transform,
-                                    transforms.morph_closing_transform,
-                                    transforms.morph_gradient_transform,
-                                    transforms.morph_tophat_transform,
-                                    transforms.morph_blackhat_transform])
-            for morph_operation, morph_func in morph_operations:
-                if args.get(morph_operation) is not None: 
-                    kernel_size, kernel_shape = args.get(morph_operation) 
-                    if args.get("random_{}".format(morph_operation)): 
-                        kernel_size = np.random.randint(1, kernel_size + 1) 
-                        kernel_shape = np.random.choice([None, "ellipse", "cross"], 
-                                                         size=None, replace=True)
-                    img, mask = morph_func(img, mask, 
-                                           kernel_size=kernel_size, 
-                                           kernel_shape=kernel_shape)
-                    label["{}_kernel_size".format(morph_operation)] = kernel_size
-                    if kernel_shape is None:
-                        kernel_shape = "rectangle"
-                    label["{}_kernel_shape".format(morph_operation)] = kernel_shape
-                    
-
-
-            # change the fill color of text stroke
-            img = fill_stroke_color(img, args.get("stroke_fill"))
+            for lt_param_ in _high_level_lt_params:
+                if args.get(lt_param_) is not None:
+                    transform_param[lt_param_] = args.get(lt_param_) 
+            for random_lt_param_ in _random_high_level_lt_params:
+                if args.get(random_lt_param_):
+                    lt_param_ = random_lt_param_[7:] 
+                    limit_value = args.get(lt_param_) 
+                    assert limit_value is not None, "The range of parameter is required."
+                    limit_value = abs(limit_value) 
+                    transform_param[lt_param_] = random.uniform(- limit_value, limit_value) 
 
             # collect labels
-            for x in ["font_weight", "stroke_fill"]:
-                if args.get(x) is not None:
-                    label[x] = args.get(x)
+            for lt_param_ in _high_level_lt_params:
+                if args.get(lt_param_) is not None:
+                    label[lt_param_] = transform_param[lt_param_] 
+
+        # sample random stroke width
+        if args.get("random_font_weight"):
+            min_font_weight, max_font_weight = get_font_weight_range(font_file_path)
+            if (min_font_weight is not None) and (max_font_weight is not None):
+                args["font_weight"] = np.random.uniform(min_font_weight, max_font_weight, None)
+
+        # generate initial text image 
+        img, mask = freetype_text_generator.render_lt_text(text, 
+                                                           font_file_path, 
+                                                           transform_param=transform_param, 
+                                                           font_size=args.get("font_size"), 
+                                                           font_weight=args.get("font_weight"), 
+                                                           stroke_radius=args.get("outline_width"))
+        
+
+        # morphological image processing, applied before color filling 
+        morph_operations = zip(["morph_erosion", 
+                                "morph_dilation"], 
+                               [transforms.morph_erosion_transform, 
+                                transforms.morph_dilation_transform])
+        for morph_operation, morph_func in morph_operations:
+            if args.get(morph_operation) is not None:
+                kernel_size, iterations, kernel_shape = args.get(morph_operation) 
+                if args.get("random_{}".format(morph_operation)):
+                    kernel_size = np.random.randint(1, kernel_size + 1)
+                    iterations = np.random.randint(1, iterations + 1)
+                    kernel_shape = np.random.choice([None, "ellipse", "cross"], 
+                                                     size=None, replace=True)
+                img, mask = morph_func(img, mask, 
+                                       kernel_size=kernel_size, 
+                                       iterations=iterations, 
+                                       kernel_shape=kernel_shape)
+                label["{}_kernel_size".format(morph_operation)] = kernel_size
+                if kernel_shape is None:
+                    kernel_shape = "rectangle"
+                label["{}_kernel_shape".format(morph_operation)] = kernel_shape 
+                label["{}_iterations".format(morph_operation)] = iterations 
+
+        morph_operations = zip(["morph_opening",
+                                "morph_closing",
+                                "morph_gradient",
+                                "morph_tophat",
+                                "morph_blackhat"], 
+                               [transforms.morph_opening_transform,
+                                transforms.morph_closing_transform,
+                                transforms.morph_gradient_transform,
+                                transforms.morph_tophat_transform,
+                                transforms.morph_blackhat_transform])
+        for morph_operation, morph_func in morph_operations:
+            if args.get(morph_operation) is not None: 
+                kernel_size, kernel_shape = args.get(morph_operation) 
+                if args.get("random_{}".format(morph_operation)): 
+                    kernel_size = np.random.randint(1, kernel_size + 1) 
+                    kernel_shape = np.random.choice([None, "ellipse", "cross"], 
+                                                     size=None, replace=True)
+                img, mask = morph_func(img, mask, 
+                                       kernel_size=kernel_size, 
+                                       kernel_shape=kernel_shape)
+                label["{}_kernel_size".format(morph_operation)] = kernel_size
+                if kernel_shape is None:
+                    kernel_shape = "rectangle"
+                label["{}_kernel_shape".format(morph_operation)] = kernel_shape
+                
 
 
+        # change the fill color of text stroke
+        if args.get("random_stroke_fill"):
+            args["stroke_fill"] = [np.random.randint(0, 256, None),
+                                   np.random.randint(0, 256, None),
+                                   np.random.randint(0, 256, None)]
+        img = fill_stroke_color(img, args.get("stroke_fill"))
+
+        # collect labels
+        for x in ["font_weight", "stroke_fill"]:
+            if args.get(x) is not None:
+                label[x] = args.get(x)
+
+        
         ##############################
         # Place transformations here #
         ##############################

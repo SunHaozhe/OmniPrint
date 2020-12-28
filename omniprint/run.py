@@ -276,12 +276,26 @@ def parse_arguments():
 		default=400,
 	)
 	parser.add_argument(
+		"-rfwt",
+		"--random_font_weight", 
+		action="store_true",
+		help="Use random font weight (stroke width).", 
+		default=False
+	)
+	parser.add_argument(
 		"-stf",
 		"--stroke_fill",
 		type=parse_color, 
 		nargs="?",
 		help="Define the color of the strokes",
 		default=None,  
+	)
+	parser.add_argument(
+		"-rstf",
+		"--random_stroke_fill", 
+		action="store_true",
+		help="Use random color to fill strokes.", 
+		default=False
 	)
 	parser.add_argument(
 		"-im",
