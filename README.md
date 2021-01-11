@@ -64,8 +64,11 @@ optional arguments:
   -c [COUNT], --count [COUNT]
                         The number of images to be created.
   -s [SIZE], --size [SIZE]
-                        Define the height of the produced images if
-                        horizontal, else the width
+                        Define the height of the produced images. If the
+                        option --ensure_square_layout is activated, then this
+                        will also be the width of the produced images,
+                        otherwise the width will be determined by both the
+                        length of the text and the height.
   -p [NB_PROCESSES], --nb_processes [NB_PROCESSES]
                         Define the number of processes to use for image
                         generation. If not provided, this equals to the number
@@ -386,7 +389,14 @@ python3 run.py --count 1000 --size 32 --ensure_square_layout --image_mode L --di
     - `--nb_processes 16` 131 img/s 
 
 
+## Legacy code
 
+The following files or directories are legacy code that are not updated yet, they are not used at this stage. 
+
+- `codecov.yml`
+- `tests.py`
+- `tests/`
+- `omniprint/generators/`
 
 ## Feature request & issues
 

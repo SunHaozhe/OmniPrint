@@ -107,7 +107,10 @@ def parse_arguments():
 		"--size",
 		type=int,
 		nargs="?",
-		help="Define the height of the produced images if horizontal, else the width",
+		help="Define the height of the produced images. If the option " +\
+		"--ensure_square_layout is activated, then this will also be the " +\
+		"width of the produced images, otherwise the width will be determined " +\
+		"by both the length of the text and the height.",
 		default=32,
 	)
 	parser.add_argument(
