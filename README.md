@@ -8,6 +8,13 @@ README not ready yet...
 A synthetic data generator for text recognition
 
 
+## Platform
+
+- Linux or macOS
+- Windows not tested, but should also work 
+- Python 3 (tested with Python 3.6.1)
+
+
 
 ## Installation
 
@@ -15,7 +22,20 @@ A synthetic data generator for text recognition
 ```zsh
 git clone https://github.com/SunHaozhe/OmniPrint
 cd OmniPrint
-pip install -r requirements.txt
+```
+
+- It is preferable to install this project within a Python virtual environment.
+
+```zsh
+virtualenv venv_omniprint 
+source venv_omniprint/bin/activate
+```
+
+- Install requirements
+
+```zsh
+pip3 install --upgrade pip 
+pip3 install -r requirements.txt
 ```
 
 
