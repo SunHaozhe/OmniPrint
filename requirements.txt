@@ -11,3 +11,4 @@ wget==3.2
 pypinyin==0.39.1
 freetype-py==2.2.0
 opencv-python>=4.4.0
+beautifulsoup4>=4.6.0

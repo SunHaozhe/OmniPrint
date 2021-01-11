@@ -41,20 +41,32 @@ pip3 install -r requirements.txt
 
 ## Getting Started
 
-Edit `quick_run.py` to set up different options, then run:
+Go to the main directory: 
+
+```zsh
+cd omniprint
+```
+
+Edit `quick_run.py` to set up different command line options, then run:
 
 ```zsh
 python3 quick_run.py  
 ```
 
-Or specify the options directly using the command line interface: 
+Alternatively, you can also specify the command line options directly using the command line interface. For example: 
 
 ```zsh
 python3 run.py --count 10
 ```
 
+To understand the command line options: 
+
+```zsh
+python3 run.py --help
 ```
-usage: run.py [-h] [--output_dir [OUTPUT_DIR]] -c [COUNT] [-s [SIZE]]
+
+```
+usage: run.py [-h] [--output_dir [OUTPUT_DIR]] [-c [COUNT]] [-s [SIZE]]
               [-p [NB_PROCESSES]] [-e [EXTENSION]] [-bl [BLUR]] [-rbl]
               [-b [BACKGROUND]] [-om] [-m [MARGINS]] [-ft [FONT]]
               [-fd [FONT_DIR]] [-fidx [FONT_INDEX]] [-id [IMAGE_DIR]]
@@ -402,11 +414,12 @@ python3 run.py --count 1000 --size 32 --ensure_square_layout --image_mode L --di
 ```
 
 - 2.7 GHz Dual-Core Intel Core i5 + SSD 
-    - `--nb_processes 1` 120 img/s
-    - `--nb_processes 2` 152 img/s
-    - `--nb_processes 4` 203 img/s
-    - `--nb_processes 8` 164 img/s 
-    - `--nb_processes 16` 131 img/s 
+    - `--nb_processes 1`   123 images per second 
+    - `--nb_processes 2`   197 images per second
+    - `--nb_processes 4`   226 images per second
+    - `--nb_processes 8`   174 images per second
+    - `--nb_processes 16` 130 images per second 
+    - `--nb_processes 32` 94 images per second
 
 
 ## Legacy code

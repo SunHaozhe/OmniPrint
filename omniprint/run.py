@@ -100,7 +100,7 @@ def parse_arguments():
 		type=int,
 		nargs="?",
 		help="The number of images to be created.",
-		required=True,
+		default=10
 	)
 	parser.add_argument(
 		"-s",
@@ -195,7 +195,8 @@ def parse_arguments():
 		default=os.path.join(os.path.split(os.path.realpath(__file__))[0], "images"),
 	)
 	parser.add_argument(
-		"-dt", "--dict", type=str, nargs="?", help="Define the dictionary to be used"
+		"-dt", "--dict", type=str, nargs="?", help="Define the dictionary to be used",
+		default="alphabets/fine/basic_latin_lowercase"
 	)
 	parser.add_argument(
 		"-fwt",
@@ -452,9 +453,9 @@ def parse_arguments():
 		type=parse_perspective_transform,
 		nargs="?",
 		help="Given the coordinates of the four corners of the first quadrilateral " +\
-    	"and the coordinates of the four corners of the second quadrilateral, " +\
-    	"perform the perspective transform that maps a new point in the first " +\
-    	"quadrilateral onto the appropriate position on the second quadrilateral. " +\
+		"and the coordinates of the four corners of the second quadrilateral, " +\
+		"perform the perspective transform that maps a new point in the first " +\
+		"quadrilateral onto the appropriate position on the second quadrilateral. " +\
 		"Perspective transformation simulates different angle of view. " +\
 		"Enter 8 real numbers (float) which correspond to the 4 corner points (2D coordinates) " +\
 		"of the target quadrilateral, these 4 corner points which be respectively " +\
@@ -672,7 +673,7 @@ def main():
 		else:
 			sys.exit("Cannot open dict")
 	else:
-		raise NotImplementedError 
+		raise Exception("Please set the option --dict") 
 
 	# Creating font (path) list
 	if args.font_index:
@@ -702,7 +703,11 @@ def main():
 		else:
 			sys.exit("Cannot open font")
 	else:
-		raise NotImplementedError 
+		font_index_dir = "fonts"
+		font_index_file = os.path.basename(args.dict) 
+		font_index_file = add_txt_extension(font_index_file)  
+		with open(os.path.join(font_index_dir, "index", font_index_file), "r") as f:
+			fonts = [os.path.join(font_index_dir, "fonts", p) for p in f.read().split("\n")] 
 
 	# Creating synthetic sentences (or word)
 	strings = create_strings_from_dict(1, False, args.count, lang_dict)
@@ -738,10 +743,10 @@ def main():
 	with multiprocessing.Pool(nb_processes) as pool:
 		imap_it = list(tqdm.tqdm(pool.imap(TextDataGenerator.generate_from_tuple, 
 										   zip([i for i in range(0, string_count)], 
-										   	    strings, 
-										   	    sampled_fonts, 
-										   	    [args_dict] * string_count, 
-										   	    [False] * string_count)), 
+												strings, 
+												sampled_fonts, 
+												[args_dict] * string_count, 
+												[False] * string_count)), 
 								total=args.count))
 	
 	# collect labels from different processes 
