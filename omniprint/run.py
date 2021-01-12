@@ -166,7 +166,8 @@ def parse_arguments():
 		"--margins",
 		type=parse_margins,
 		nargs="?",
-		help="Define the margins (percentage) around the text when rendered. Each element should be a float",
+		help="Define the margins (percentage) around the text when rendered. " +\
+		"Each element (top, left, bottom and right) should be a float",
 		default=[0, 0, 0, 0],
 	)
 	parser.add_argument(
@@ -452,7 +453,8 @@ def parse_arguments():
 		"--perspective_transform",
 		type=parse_perspective_transform,
 		nargs="?",
-		help="Given the coordinates of the four corners of the first quadrilateral " +\
+		help="Apply a perspective transformation. " +\
+		"Given the coordinates of the four corners of the first quadrilateral " +\
 		"and the coordinates of the four corners of the second quadrilateral, " +\
 		"perform the perspective transform that maps a new point in the first " +\
 		"quadrilateral onto the appropriate position on the second quadrilateral. " +\
@@ -466,8 +468,7 @@ def parse_arguments():
 		"the entered corner points should match the order of magnitude and must be convex. " +\
 		"For example, 0,0,1,0,0,1,1,1 will produce identity transform. " +\
 		"This option will have no effect if --random_perspective_transform is set. " +\
-		"This option sometimes will cut off the periphery of the text, causing noisy " +\
-		"data. ",
+		"This option should never be used together with added margins.",
 		default=None
 	)
 	parser.add_argument(
@@ -475,11 +476,12 @@ def parse_arguments():
 		"--random_perspective_transform",
 		type=float,
 		nargs="?",
-		help="Randomly generate a convex quadrilateral which will be mapped to the normalized unit square, " +\
+		help="Randomly use a perspective transformation. " +\
+		"Randomly generate a convex quadrilateral which will be mapped to the normalized unit square, " +\
 		"the value of each axis is independently sampled from the gaussian distribution, " +\
 		"the standard deviation of the gaussian distribution is given by --random_perspective_transform. " +\
 		"If this option is present but not followed by a command-line argument, the standard deviation " +\
-		"0.05 will be used by default. ",
+		"0.05 will be used by default. This option should never be used together with added margins.",
 		default=None,
 		const=0.05
 	)

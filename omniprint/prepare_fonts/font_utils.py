@@ -177,18 +177,22 @@ def test_freetype_compatibility(face, text_):
 		return True 
 	
 
-# problematic font files 
+# black list of font files, it contains problematic font files 
 _hard_coded_black_list = ['albayan', 'baghdad', 'capture_it_2', 'courier new', 'gurumaa-2.04', 
 						  'hoefler text ornaments', 'keyboard', 'kufistandardgk', 'lohit_as', 
 						  'lohit_bn', 'nadeem', 'notoserifthai-black', 'notoserifthai-condensed', 
 						  'notoserifthai-condensedblack', 'notoserifthai-regular', 
 						  'notoserifthai-semicondensed', 'notoserifthai-semicondensedblack', 
-						  'osho_v125.ttf', 'samyak-devanagari', 'samyak-gujarati', 'utibetan', 
-						  'webdings', 'wingdings', 'wingdings 2', 'wingdings 3', 'zapfdingbats']
+						  'osho_v125', 'samyak-devanagari', 'samyak-gujarati', 'utibetan', 
+						  'webdings', 'wingdings', 'wingdings 2', 'wingdings 3', 'zapfdingbats', 
+						  'symbol']
 
 
+# text set file names that do not correspond to languages
 _non_language_text_set_file_name_list = ["ascii_digits", "common_punctuations_symbols", 
 										 "mathematical_operators", "musical_symbols"]
+# black list of font files, this black list will be applied 
+# when the text set does not correspond to languages
 _non_language_symbol_font_black_list = ['tamu_kadampari', 'tamu_kalyani', 'tamu_maduram', 
 										'tscu_comic', 'tscu_paranar', 'tscu_paranarb', 
 										'tscu_paranari', 'mitra']

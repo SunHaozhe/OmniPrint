@@ -1,12 +1,7 @@
 # OmniPrint 
 
 
-
-README not ready yet...
-
-
-A synthetic data generator for text recognition
-
+A synthetic data generator of isolated printed characters. 
 
 ## Platform
 
@@ -41,22 +36,138 @@ pip3 install -r requirements.txt
 
 ## Getting Started
 
+We do not provide fonts (the directory `omniprint/fonts/`) along with this project, users have to run the font preparation program (under the directory `omniprint/prepare_fonts/`) themselves before being able to run any experiments. By running the font preparation program, the directory `omniprint/prepare_fonts/fonts/` will be generated, move it to `omniprint/fonts/`. The font preparation program does not only download the font files, it also generates some metadata which is necessary for this project. Please check [omniprint/prepare_fonts/README.md](omniprint/prepare_fonts/README.md) for more details. 
+
+Fonts are usually protected under their own licenses. Some fonts cannot be redistributed or modified, which is the reason why we do not provide the directory `omniprint/fonts/` here. We do not provide any warranty for the fonts. 
+
+The entry point of **OmniPrint** is the script `omniprint/run.py`, the simplest example would be `python3 run.py –count 10`. A lot of options can be passed to `run.py` (see `python3 run.py --help`). In order to avoid the overhead of writing these options every time, we provide a helper script called `omniprint/quick_run.py`. Users can edit all the options in `omniprint/quick_run.py`, then simply run `python3 quick_run.p`.
+
+
+
 Go to the main directory: 
 
 ```zsh
 cd omniprint
 ```
 
-Edit `quick_run.py` to set up different command line options, then run:
+Run the font preparation program:
+
+```zsh
+# go to the font preparation directory 
+cd prepare_fonts
+
+# The font preparation program 
+## On linux/MacOS system, the following two lines 
+## can be replaced by ./pipeline.sh
+python3 download_fonts.py
+python3 build_font_directory.py -d ../alphabets/fine 
+
+# move omniprint/prepare_fonts/fonts/ to omniprint/fonts/
+mv fonts ../fonts
+
+# go back to the main directory 
+cd ../
+```
+
+Edit the class `Parameters` in `quick_run.py` to set up different command line options, then run:
 
 ```zsh
 python3 quick_run.py  
 ```
 
-Alternatively, you can also specify the command line options directly using the command line interface. For example: 
+Alternatively, specify the command line options directly using the command line interface. Here are some examples: 
 
 ```zsh
+# generate 10 images using default options
 python3 run.py --count 10
+
+# generate 1000 images with height 64
+python3 run.py --count 1000 --size 64
+
+# generate 1000 images with height and width 32
+python3 run.py --count 1000 --size 32 --ensure_square_layout
+
+# generate 1000 images with height and width 32, 
+# all characters are rotated by 5.4 degrees clockwise. 
+python3 run.py --count 1000 --size 32 --ensure_square_layout --rotation -5.4
+
+# generate 1000 images with height and width 32, 
+# characters are randomly rotated within [-30, 30] degrees. 
+python3 run.py --count 1000 --size 32 --ensure_square_layout --rotation 30 --random_rotation
+
+# generate 1000 images with height and width 32, 
+# characters are randomly rotated within [-30, 30] degrees, 
+# they are also randomly sheared within [-0.5, 0.5].
+python3 run.py --count 1000 --size 32 --ensure_square_layout --rotation 30 --random_rotation --shear_x 0.5 --random_shear_x 
+
+# generate 10 images with height and width 32, 
+# each character is centered with added margins, 
+# the added margins are 10% of the height/width 
+# for top, left, bottom and right. 
+python3 run.py --count 10 --size 32 --ensure_square_layout --margins 0.1,0.1,0.1,0.1
+
+# generate 10 images with height and width 32, 
+# the character roughly occupies 64% of the space 
+# in the image. The position of the character is 
+# random within the image while ensuring the 
+# character remains complete (random translation 
+# in both directions). 
+python3 run.py --count 10 --size 32 --ensure_square_layout --margins 0.1,0.1,0.1,0.1 --random_translation_x --random_translation_y 
+
+# generate grayscale images
+python3 run.py --count 10 --size 32 --ensure_square_layout --image_mode L 
+
+# generate binary images
+python3 run.py --count 10 --size 32 --ensure_square_layout --image_mode 1
+
+# text is filled with red color (foreground) 
+python3 run.py --count 10 --size 32 --ensure_square_layout --stroke_fill 255,0,0
+
+# text is filled with a random RGB color (foreground)
+python3 run.py --count 10 --size 32 --ensure_square_layout --random_stroke_fill
+
+# text with random Gaussian blurring 
+# (after resizing/downsampling)
+python3 run.py --count 10 --size 32 --ensure_square_layout --blur 2 --random_blur 
+
+# text with Gaussian noise background 
+python3 run.py --count 10 --size 32 --ensure_square_layout --background 0
+
+# text with plain white background 
+python3 run.py --count 10 --size 32 --ensure_square_layout --background 1
+
+# text with image background, the background is 
+# randomly cropped from some external images 
+python3 run.py --count 10 --size 32 --ensure_square_layout --background 3
+
+# text in other scripts/languages
+python3 run.py --count 10 --size 32 --ensure_square_layout --dict alphabets/fine/chinese_group1 
+
+python3 run.py --count 10 --size 32 --ensure_square_layout --dict alphabets/fine/hebrew
+
+python3 run.py --count 10 --size 32 --ensure_square_layout --dict alphabets/fine/khmer_consonants
+
+python3 run.py --count 10 --size 32 --ensure_square_layout --dict alphabets/fine/mongolian_digits 
+
+# variable font weight (stroke width). 
+## Make sure that the used fonts all support 
+## customizable font weight. Font index files 
+## with names variable_weight_* contain these 
+## kind of fonts. 
+python3 run.py --count 10 --size 32 --ensure_square_layout --dict alphabets/fine/basic_latin_uppercase --font_index fonts/variable_weight_basic_latin_uppercase --random_font_weight
+
+# morphological image processing - erosion
+## with kernel size 3, number of iterations 2 and 
+## elliptical kernel
+python3 run.py --count 10 --size 32 --ensure_square_layout --morph_erosion 3,2,ellipse
+
+# morphological image processing - erosion
+## with kernel size 3, number of iterations 2 and 
+## elliptical kernel
+python3 run.py --count 10 --size 32 --ensure_square_layout --morph_erosion 3,2,ellipse
+
+# apply a random morphological erosion operation 
+python3 run.py --count 10 --size 32 --ensure_square_layout --random_morph_erosion
 ```
 
 To understand the command line options: 
@@ -118,7 +229,8 @@ optional arguments:
   -om, --output_mask    Define if the generator will return masks for the text
   -m [MARGINS], --margins [MARGINS]
                         Define the margins (percentage) around the text when
-                        rendered. Each element should be a float
+                        rendered. Each element (top, left, bottom and right)
+                        should be a float
   -ft [FONT], --font [FONT]
                         Define font to be used
   -fd [FONT_DIR], --font_dir [FONT_DIR]
@@ -237,7 +349,8 @@ optional arguments:
                         Uniformly sample the value of vertical translation.
                         This will have no effect if vertical margins are 0
   -pt [PERSPECTIVE_TRANSFORM], --perspective_transform [PERSPECTIVE_TRANSFORM]
-                        Given the coordinates of the four corners of the first
+                        Apply a perspective transformation. Given the
+                        coordinates of the four corners of the first
                         quadrilateral and the coordinates of the four corners
                         of the second quadrilateral, perform the perspective
                         transform that maps a new point in the first
@@ -257,17 +370,19 @@ optional arguments:
                         0,0,1,0,0,1,1,1 will produce identity transform. This
                         option will have no effect if
                         --random_perspective_transform is set. This option
-                        sometimes will cut off the periphery of the text,
-                        causing noisy data.
+                        should never be used together with added margins.
   -rpt [RANDOM_PERSPECTIVE_TRANSFORM], --random_perspective_transform [RANDOM_PERSPECTIVE_TRANSFORM]
-                        Randomly generate a convex quadrilateral which will be
-                        mapped to the normalized unit square, the value of
-                        each axis is independently sampled from the gaussian
+                        Randomly use a perspective transformation. Randomly
+                        generate a convex quadrilateral which will be mapped
+                        to the normalized unit square, the value of each axis
+                        is independently sampled from the gaussian
                         distribution, the standard deviation of the gaussian
                         distribution is given by
                         --random_perspective_transform. If this option is
                         present but not followed by a command-line argument,
                         the standard deviation 0.05 will be used by default.
+                        This option should never be used together with added
+                        margins.
   -gpr GAUSSIAN_PRIOR_RESIZING, --gaussian_prior_resizing GAUSSIAN_PRIOR_RESIZING
                         If not None, apply Gaussian filter to smooth image
                         prior to resizing, the argument of this parameter
@@ -378,39 +493,217 @@ optional arguments:
 ```
 
 
+## Examples
 
-### Examples
+### Example 1
 
-`python3 run.py -c 1000 --size 64`
+![first_dataset.png](images/first_dataset.png)
+
+In this first example, every image is grayscale and contains a single character randomly selected from Hiragana script (Japanese). The size of each image is 32x32. Every character is rotated by a random degree uniformly sampled from the range [−30,30], composed by a random horizontal shear uniformly sampled from the range [−0.5, 0.5]. Each character occupies about 64% of the area of the image. The random translation option along both horizontal and vertical axes is activated, which means that each foreground text was pasted at a random position within its background image. We used plain whiteboard as the background for this dataset. The standard deviation of the Gaussian filter prior to downsampling is 2.
+
+To reproduce this example using `omniprint/quick_run.py`:
+
+- First edit `omniprint/quick_run.py` like this
+
+```python
+class Parameters:
+    count = 1000
+    size = 32 
+    ensure_square_layout = True
+    image_mode = "L" 
+    margins = "0.1,0.1,0.1,0.1"
+    background = 1 
+    dict_ = "alphabets/fine/hiragana" 
+    random_translation_x = True 
+    random_translation_y = True 
+    gaussian_prior_resizing = 2 
+    rotation = 30
+    random_rotation = True 
+    shear_x = 0.5
+    random_shear_x = True 
+```
+
+- Then run `python3 quick_run.py` 
+
+Equivalently, run:
+
+```zsh
+python3 run.py --count 1000 --size 32 --ensure_square_layout --image_mode L --margins 0.1,0.1,0.1,0.1 --background 1 --dict alphabets/fine/hiragana --random_translation_x --random_translation_y --gaussian_prior_resizing 2 --rotation 30 --random_rotation --shear_x 0.5 --random_shear_x 
+```
 
 
-By default, generated images will be stored to `out/` in the current working directory.
 
-### Text rotation
+### Example 2
 
-Add `-rtn` and `-rrtn` (`python3 run.py -c 1000 --size 64 -rtn 5 -rrtn`)
+![second_dataset.png](images/second_dataset.png)
+
+In the second example, characters are chosen from Russian alphabet. Each image is RGB and resized to 64x64. No margins are added. A random perspective transform is applied to each image (foreground text layer). The background is randomly cropped from some external images.
+
+To reproduce this example using `omniprint/quick_run.py`:
+
+- First edit `omniprint/quick_run.py` like this
+
+```python
+class Parameters:
+    count = 1000
+    size = 64 
+    ensure_square_layout = True
+    image_mode = "RGB" 
+    background = 3 
+    dict_ = "alphabets/fine/russian" 
+    random_perspective_transform = 0.05
+```
+
+- Then run `python3 quick_run.py` 
+
+Equivalently, run:
+
+```zsh
+python3 run.py --count 1000 --size 64 --ensure_square_layout --image_mode RGB --background 3 --dict alphabets/fine/russian --random_perspective_transform 0.05
+```
 
 
-### Text blurring
+## Dataset formats 
 
-Add `-bl` and `-rbl` to get gaussian blur on the generated image with user-defined radius (here 0, 1, 2, 4):
+### Raw dataset 
+
+By default, the generated raw dataset will be stored under the directory `omniprint/out/`. For example, let's assume that `omniprint/out/20201222_223218_562501/` is one raw dataset generated by one run (`python3 quick_run.py`). The name `20201222_223218_562501` corresponds to the UTC date and time. `omniprint/out/20201222_223218_562501/` contains two subdirectories:
+
+- `omniprint/out/20201222_223218_562501/data/`
+- `omniprint/out/20201222_223218_562501/label/`
+
+`omniprint/out/20201222_223218_562501/data/` contains images such as 
+
+- `omniprint/out/20201222_223218_562501/data/20201222_223218_562501_0.png`
+- `omniprint/out/20201222_223218_562501/data/20201222_223218_562501_1.png`
+- `omniprint/out/20201222_223218_562501/data/20201222_223218_562501_2.png`
+- etc. 
+
+`omniprint/out/20201222_223218_562501/label/` contains one single file `raw_labels.csv`. This csv files contains all available labels, its column depends on the used command line options. For example, its column can include: 
+
+- `image_name`
+- `text`
+- `unicode_code_point`
+- `font_file`
+- `font_weight`
+- `image_height_resolution`
+- `image_width_resolution`
+- `margin_bottom`
+- `rotation`
+- `shear_x`
+- `family_name` (font)
+- `style_name` (font)
+- `postscript_name` (font)
+- etc. 
 
 
-### Background
+Although the raw datasets could be used directly by extracting desired labels from `omniprint/out/20201222_223218_562501/label/raw_labels.csv`, we provide utility programs which turn them into more standard dataset formats like [AutoML format](https://github.com/codalab/chalab/wiki/Help:-Wizard-%E2%80%90-Challenge-%E2%80%90-Data) and [AutoDL File format](https://github.com/zhengying-liu/autodl-contrib/tree/master/file_format). This utility programs are stored under the directory `omniprint/dataset/`. 
+
+
+### Dataset in AutoML format or AutoDL File format
+
+- [AutoML format](https://github.com/codalab/chalab/wiki/Help:-Wizard-%E2%80%90-Challenge-%E2%80%90-Data) is better for machine to use. Basically, AutoML format stores the whole dataset in the form of a single matrix. Each row of the matrix corresponds to one vectorized image. Consequently, if one wants to use AutoML format, one must ensure that each image is of the same size (at least the same number of pixels * channels). The raw dataset should normally be generated using the command line option `--ensure_square_layout`, otherwise the width of the images may differ. 
+- [AutoDL File format](https://github.com/zhengying-liu/autodl-contrib/tree/master/file_format) is better for human to visualize. Basically, AutoDL File format stores the images as they are. This format is similar to the format of the raw datasets. 
+
+The entry point of the dataset formatting program is `omniprint/dataset/run_dataset_formatter.py`. 
+
+```zsh
+python3 run_dataset_formatter.py --help
+```
+
+```
+usage: run_dataset_formatter.py [-h] [-n DATASET_NAME] [-r RAW_DATASET_PATH]
+                                [-l LABEL_NAME] [-ir] [-f FORMAT]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -n DATASET_NAME, --dataset_name DATASET_NAME
+  -r RAW_DATASET_PATH, --raw_dataset_path RAW_DATASET_PATH
+  -l LABEL_NAME, --label_name LABEL_NAME
+  -ir, --is_regression
+  -f FORMAT, --format FORMAT
+                        Which data format to use? Options: automl, file.
+```
+
+First, go to the dataset formatting directory `omniprint/dataset/`:
+
+```zsh
+cd dataset
+```
+
+For example, if one wants to turn `omniprint/out/20201222_223218_562501/` into AutoML format and wants to make a multiclass classification dataset of characters/symbols, one can use the column `unicode_code_point` of `omniprint/out/20201222_223218_562501/label/raw_labels.csv`. Unicode code point is the unique ID of each character, each Unicode code point is an integer. 
+
+```zsh
+python3 run_dataset_formatter.py --dataset_name make_a_name_as_you_like --raw_dataset_path ../out/20201222_223218_562501 --label_name unicode_code_point --format automl
+```
+
+Instead of AutoML format, if one wants to make the same dataset in AutoDL File format.
+
+```zsh
+python3 run_dataset_formatter.py --dataset_name make_a_name_as_you_like --raw_dataset_path ../out/20201222_223218_562501 --label_name unicode_code_point --format file
+```
+
+If one wants to make a regression dataset from `omniprint/out/20201222_223218_562501/` in AutoML format and wants to predict the rotation of characters/symbols, one can use the column `rotation` (`float`) of `omniprint/out/20201222_223218_562501/label/raw_labels.csv`.
+
+```zsh
+python3 run_dataset_formatter.py --dataset_name make_a_name_as_you_like --raw_dataset_path ../out/20201222_223218_562501 --label_name unicode_code_point --format automl --is_regression
+```
+
+If one wants to make a regression dataset from `omniprint/out/20201222_223218_562501/` in AutoDL File format and wants to predict the horizontal shear of characters/symbols, one can use the column `shear_x` (`float`) of `omniprint/out/20201222_223218_562501/label/raw_labels.csv`.
+
+```zsh
+python3 run_dataset_formatter.py --dataset_name make_a_name_as_you_like --raw_dataset_path ../out/20201222_223218_562501 --label_name shear_x --format file --is_regression
+```
+
+The formatted datasets (AutoML format or AutoDL File format) are stored under the directory `omniprint/dataset/datasets/`.
 
 
 
-## Add new fonts
+
+## Extensibility
+
+**OmniPrint** is easily extensible. 
+
+### Adding new languages/scripts/alphabets 
+
+Importing new alphabets is easy in **OmniPrint**. For example, if one wants to add an alphabet called `esperanto`. 
+
+- Create a text file called `esperanto.txt` under the directory `omniprint/alphabets/`
+- In `omniprint/alphabets/esperanto.txt`, insert alphabet/character/symbol of this language/script, one item per line. This file should not contain empty lines. 
+- Don't forget to make a font index file for this newly added alphabet, for example `omniprint/fonts/index/esperanto.txt`. Insert names (including suffix like `.ttf` or `.otf`) of the font files (among font files under `omniprint/fonts/fonts/`) that fully support `omniprint/alphabets/esperanto.txt`.
+- Optionally, make `omniprint/fonts/index/variable_weight_esperanto.txt` to allow font weight (stroke width) variation.
+
+
+### Adding new fonts
+
+Importing new fonts is easy in **OmniPrint**. 
+
+- Move new fonts to the directory `omniprint/fonts/fonts/`
+- Optionally, update the index file under the directory `omniprint/fonts/index/` if users want to randomly select fonts
+- Optionally, update the metadata of fonts under the directory `omniprint/fonts/metadata/`
+- Users should not forget to include license files in the directory `omniprint/fonts/licenses/`
+
+Please be aware that some fonts can produce false rendering without reporting warnings or errors, users import new fonts at their own risk. 
+
+### Adding new transformations
+
+New post-rasterization transformations can be easily added to the image generation pipeline. For example, if one wants to add a transformation called `my_transform`.
+
+- Create a Python script called `my_transform.py` under the directory `omniprint/transforms/`
+- Implement the desired functionalities in `omniprint/transforms/my_transform.py`, which contains a function called `transform`. The first two positional parameters of the function `transform` should be the image and its corresponding mask. (Used for masking foreground text layer such that only the text itself will be pasted onto the background.) The image is a RGB `PIL.Image.Image` object (The image will be converted to grayscale image or binary image in the end, if needed.) where text is black (`0`) and background is white (`255`). The mask is a grayscale `PIL.Image.Image` object where text is white (`255`) and background is black (`0`). In principle, the mask should undergo the same operations as the image while taking into account the difference in image mode and black/white convention. The function `transform` can, of course, accept other parameters, which is usually the case. The output of the function `transform` is a `tuple` of size 2: the first is the transformed image, the second is the transformed mask. 
+- Edit the script `omniprint/transforms/__init__.py`, add one line: `from transforms.my_transform import transform as my_transform`
+- Edit the script `omniprint/data_generator.py` to insert the implemented transform at appropriate location. For example, `img, mask = my_transform(img, mask)`
+- It is recommended to edit the argument parsing function of the entry script `omniprint/run.py`, which allows specifying parameters of the newly implemented transformation via command line options. It is also recommended to wrap `img, mask = my_transform(img, mask)` in `omniprint/data_generator.py` by something like `if args.get(my_transform) is not None:`, which allows to activate and deactivate the newly implemented transformation.
 
 
 
-## Benchmarks
+## Speed benchmarks
 
 Number of images generated per second.
 
 Test command: 
 ```python
-python3 run.py --count 1000 --size 32 --ensure_square_layout --image_mode L --dict alphabets/fine/basic_latin_lowercase --font_index fonts/basic_latin_lowercase
+python3 run.py --count 1000 --size 32 --ensure_square_layout --image_mode L --dict alphabets/fine/basic_latin_lowercase
 ```
 
 - 2.7 GHz Dual-Core Intel Core i5 + SSD 
@@ -432,6 +725,8 @@ The following files or directories are legacy code that are not updated yet, the
 - `omniprint/generators/`
 
 ## Feature request & issues
+
+Despite our effort, it may be still possible to observe incorrectly rendered images unfortunately due to corrupted font files. If you do observe this kind of error, please open an issue and provide the raw label csv file `omniprint/out/xxx/label/raw_labels.csv` of that raw dataset. We will then identify the problematic font file and filter it out. 
 
 If anything is missing, unclear, or simply not working, open an issue on the repository.
 

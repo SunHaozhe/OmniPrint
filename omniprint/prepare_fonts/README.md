@@ -2,13 +2,13 @@
 
 ### What to do
 
-With linux/MacOS system, the simplest to do is
+On linux/MacOS system, the simplest to do is
 
 ```zsh
 ./pipeline.sh
 ```
 
-Otherwise, sequentially run the following commands:
+Alternatively, sequentially run the following commands:
 
 ```zsh
 python3 download_fonts.py

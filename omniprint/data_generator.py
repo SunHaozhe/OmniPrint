@@ -2,7 +2,7 @@ import os
 import random 
 import math 
 import numpy as np 
-import scipy 
+import scipy.ndimage
 
 import PIL
 from PIL import Image, ImageFilter
