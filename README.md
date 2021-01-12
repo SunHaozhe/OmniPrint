@@ -726,7 +726,7 @@ The following files or directories are legacy code that are not updated yet, the
 
 ## Feature request & issues
 
-Despite our effort, it may be still possible to observe incorrectly rendered images unfortunately due to corrupted font files. If you do observe this kind of error, please open an issue and provide the raw label csv file `omniprint/out/xxx/label/raw_labels.csv` of that raw dataset. We will then identify the problematic font file and filter it out. 
+Despite our effort, it may still be possible to observe incorrectly rendered images unfortunately due to corrupted font files. If you do observe this kind of error, please open an issue and provide the raw label csv file `omniprint/out/xxx/label/raw_labels.csv` of that raw dataset. We will then identify the problematic font file and filter it out. 
 
 If anything is missing, unclear, or simply not working, open an issue on the repository.
 
