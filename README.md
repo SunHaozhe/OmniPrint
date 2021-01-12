@@ -646,7 +646,7 @@ python3 run_dataset_formatter.py --dataset_name make_a_name_as_you_like --raw_da
 If one wants to make a regression dataset from `omniprint/out/20201222_223218_562501/` in AutoML format and wants to predict the rotation of characters/symbols, one can use the column `rotation` (`float`) of `omniprint/out/20201222_223218_562501/label/raw_labels.csv`.
 
 ```zsh
-python3 run_dataset_formatter.py --dataset_name make_a_name_as_you_like --raw_dataset_path ../out/20201222_223218_562501 --label_name unicode_code_point --format automl --is_regression
+python3 run_dataset_formatter.py --dataset_name make_a_name_as_you_like --raw_dataset_path ../out/20201222_223218_562501 --label_name rotation --format automl --is_regression
 ```
 
 If one wants to make a regression dataset from `omniprint/out/20201222_223218_562501/` in AutoDL File format and wants to predict the horizontal shear of characters/symbols, one can use the column `shear_x` (`float`) of `omniprint/out/20201222_223218_562501/label/raw_labels.csv`.
