@@ -6,7 +6,7 @@ from PIL import Image
 _plan_square = np.array([[0, 0], [1, 0], [0, 1], [1, 1]], dtype=np.float64)
 _middle_point_coordinates = np.array([0.5, 0.5], dtype=np.float64)
 
-def compute_perspective_params(plan_1, plan_2, width_, height_, gravity=0.05):
+def compute_perspective_params(plan_1, plan_2, width_, height_):
 	"""
 	Given the coordinates of the four corners of the first quadrilateral 
 	and the coordinates of the four corners of the second quadrilateral, 
@@ -24,12 +24,7 @@ def compute_perspective_params(plan_1, plan_2, width_, height_, gravity=0.05):
 	p1, p2:
 		tuple of two float (corner coordinates normalized to [0, 1] range)
 		p1 corresponds to coordinates in the source plan (x, y)
-		p2 corresponds to coordinates in the target plan (X, Y)
-
-	gravity:
-		gravity of the center point (0.5, 0.5). Points on plan_1 will be 
-		attracted to the center, which helps reduce the chance of incomplete 
-		text periphery.  
+		p2 corresponds to coordinates in the target plan (X, Y) 
 	"""
 	A = []
 	plan_1 = np.array(plan_1, copy=True)
@@ -38,8 +33,6 @@ def compute_perspective_params(plan_1, plan_2, width_, height_, gravity=0.05):
 	plan_1[:, 1] = plan_1[:, 1] * height_
 	plan_2[:, 0] = plan_2[:, 0] * width_
 	plan_2[:, 1] = plan_2[:, 1] * height_
-	for x in plan_1:
-		x += gravity * (_middle_point_coordinates - x)
 	
 	for p1, p2 in zip(plan_1, plan_2):
 		A.append([p1[0], p1[1], 1, 0, 0, 0, - p2[0] * p1[0], - p2[0] * p1[1]])
