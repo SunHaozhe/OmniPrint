@@ -3,6 +3,10 @@
 
 A synthetic data generator of isolated printed characters. 
 
+
+![random_rgb_characters.png](images/random_rgb_characters.png)
+
+
 ## Platform
 
 - Linux or macOS
