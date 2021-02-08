@@ -719,15 +719,6 @@ python3 run.py --count 1000 --size 32 --ensure_square_layout --image_mode L --di
     - `--nb_processes 32` 94 images per second
 
 
-## Legacy code
-
-The following files or directories are legacy code that are not updated yet, they are not used at this stage. 
-
-- `codecov.yml`
-- `tests.py`
-- `tests/`
-- `omniprint/generators/`
-
 ## Feature request & issues
 
 Despite our effort, it may still be possible to observe incorrectly rendered images unfortunately due to corrupted font files. If you do observe this kind of error, please open an issue and provide the raw label csv file `omniprint/out/xxx/label/raw_labels.csv` of that raw dataset. We will then identify the problematic font file and filter it out. 

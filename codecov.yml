@@ -1,3 +1,0 @@
-ignore:
-  - "omniprint/run.py"
-  - "tests.py"
