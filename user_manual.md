@@ -735,6 +735,8 @@ If you encounter any technical issues, please file a GitHub Issue.
 
 ## Citation
 
+[Paper](https://openreview.net/pdf?id=R07XwJPmgpl) | [Appendix](https://openreview.net/attachment?id=R07XwJPmgpl&name=supplementary_material)
+
 ```
 @inproceedings{sun2021omniprint,
 title={OmniPrint: A Configurable Printed Character Synthesizer},
