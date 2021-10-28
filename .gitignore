@@ -128,14 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-baseline_algorithms/cache/
-baseline_algorithms/model_checkpoints/
-baseline_algorithms/wandb_logs/
-omniprint/alphabets/omniglot_like_ways.csv
-omniprint/alphabets/omniglot_like_ways_describe.csv
-omniprint/alphabets/tmp_summary_omniglot_like_alphabets.py
 omniprint/dataloader/cache/
-synthetic_train/cache/
-synthetic_train/json_logs/
-synthetic_train/wandb_logs/
 omniprint/out/
