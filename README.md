@@ -8,7 +8,7 @@
 
 - Linux or macOS
 - Windows not tested, but should also work 
-- Python >= 3.6.1
+- Python 3.8
 
 
 

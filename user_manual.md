@@ -12,7 +12,7 @@ Please carefull follow this user manual step by step in order to be able to synt
 
 - Linux or macOS
 - Windows not tested, but should also work 
-- Python >= 3.6.1
+- Python 3.8
 
 
 
