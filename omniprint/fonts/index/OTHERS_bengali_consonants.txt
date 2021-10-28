@@ -1,0 +1,5 @@
+NotoSansBengali-Black.ttf
+NotoSansBengali-Regular.ttf
+NotoSansBengaliUI-Black.ttf
+NotoSansBengaliUI-Regular.ttf
+NotoSerifBengali-Regular.ttf

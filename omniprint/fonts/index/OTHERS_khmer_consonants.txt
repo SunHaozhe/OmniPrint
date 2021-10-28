@@ -1,0 +1,17 @@
+NotoSansKhmer-Black.ttf
+NotoSansKhmer-Condensed.ttf
+NotoSansKhmer-CondensedBlack.ttf
+NotoSansKhmer-SemiCondensed.ttf
+NotoSansKhmer-SemiCondensedBlack.ttf
+NotoSansKhmerUI-Black.ttf
+NotoSansKhmerUI-Condensed.ttf
+NotoSansKhmerUI-CondensedBlack.ttf
+NotoSansKhmerUI-Regular.ttf
+NotoSansKhmerUI-SemiCondensed.ttf
+NotoSansKhmerUI-SemiCondensedBlack.ttf
+NotoSerifKhmer-Black.ttf
+NotoSerifKhmer-Condensed.ttf
+NotoSerifKhmer-CondensedBlack.ttf
+NotoSerifKhmer-Regular.ttf
+NotoSerifKhmer-SemiCondensed.ttf
+NotoSerifKhmer-SemiCondensedBlack.ttf

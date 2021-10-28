@@ -1,0 +1,12 @@
+NotoSansArmenian-Black.ttf
+NotoSansArmenian-Condensed.ttf
+NotoSansArmenian-CondensedBlack.ttf
+NotoSansArmenian-Regular.ttf
+NotoSansArmenian-SemiCondensed.ttf
+NotoSansArmenian-SemiCondensedBlack.ttf
+NotoSerifArmenian-Black.ttf
+NotoSerifArmenian-Condensed.ttf
+NotoSerifArmenian-CondensedBlack.ttf
+NotoSerifArmenian-Regular.ttf
+NotoSerifArmenian-SemiCondensed.ttf
+NotoSerifArmenian-SemiCondensedBlack.ttf

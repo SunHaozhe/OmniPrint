@@ -1,0 +1,12 @@
+NotoSansThai-Black.ttf
+NotoSansThai-Condensed.ttf
+NotoSansThai-CondensedBlack.ttf
+NotoSansThai-Regular.ttf
+NotoSansThai-SemiCondensed.ttf
+NotoSansThai-SemiCondensedBlack.ttf
+NotoSansThaiUI-Black.ttf
+NotoSansThaiUI-Condensed.ttf
+NotoSansThaiUI-CondensedBlack.ttf
+NotoSansThaiUI-Regular.ttf
+NotoSansThaiUI-SemiCondensed.ttf
+NotoSansThaiUI-SemiCondensedBlack.ttf

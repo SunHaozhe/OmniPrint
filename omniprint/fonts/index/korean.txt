@@ -1,0 +1,5 @@
+NotoSansCJKkr-Black.otf
+NotoSansCJKkr-Regular.otf
+NotoSansMonoCJKkr-Regular.otf
+NotoSerifCJKkr-Black.otf
+NotoSerifCJKkr-Regular.otf

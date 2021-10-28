@@ -1,0 +1,11 @@
+NotoKufiArabic-Regular.ttf
+NotoNaskhArabic-Regular.ttf
+NotoNaskhArabicUI-Regular.ttf
+NotoSansArabic-CondensedBlack.ttf
+NotoSansArabic-SemiCondensedBlack.ttf
+NotoSansArabicUI-Black.ttf
+NotoSansArabicUI-Condensed.ttf
+NotoSansArabicUI-CondensedBlack.ttf
+NotoSansArabicUI-Regular.ttf
+NotoSansArabicUI-SemiCondensed.ttf
+NotoSansArabicUI-SemiCondensedBlack.ttf

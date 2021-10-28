@@ -1,0 +1,12 @@
+NotoSansHebrew-Black.ttf
+NotoSansHebrew-Condensed.ttf
+NotoSansHebrew-CondensedBlack.ttf
+NotoSansHebrew-Regular.ttf
+NotoSansHebrew-SemiCondensed.ttf
+NotoSansHebrew-SemiCondensedBlack.ttf
+NotoSerifHebrew-Black.ttf
+NotoSerifHebrew-Condensed.ttf
+NotoSerifHebrew-CondensedBlack.ttf
+NotoSerifHebrew-Regular.ttf
+NotoSerifHebrew-SemiCondensed.ttf
+NotoSerifHebrew-SemiCondensedBlack.ttf

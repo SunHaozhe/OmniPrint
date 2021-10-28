@@ -1,0 +1,55 @@
+,alphabet,representative_font
+0,arabic,Arial.ttf
+1,armenian_lowercase,Arial Unicode.ttf
+2,armenian_uppercase,Arial Unicode.ttf
+3,ascii_digits,Arial.ttf
+4,balinese_consonants,NotoSansBalinese-Regular.ttf
+5,balinese_digits,NotoSansBalinese-Regular.ttf
+6,balinese_independent_vowels,NotoSansBalinese-Regular.ttf
+7,basic_latin_lowercase,Arial.ttf
+8,basic_latin_uppercase,Arial.ttf
+9,bengali_consonants,Arial Unicode.ttf
+10,bengali_digits,Arial Unicode.ttf
+11,bengali_independent_vowels,Arial Unicode.ttf
+12,common_punctuations_symbols,Arial.ttf
+13,devanagari_consonants,Arial Unicode.ttf
+14,devanagari_digits,Arial Unicode.ttf
+15,devanagari_independent_vowels,NotoSansDevanagari-Regular.ttf
+16,ethiopic_digits_numbers,NotoSansEthiopic-Regular.ttf
+17,georgian,NotoSansGeorgian-Regular.ttf
+18,greek,Arial.ttf
+19,gujarati_consonants,Arial Unicode.ttf
+20,gujarati_digits,Arial Unicode.ttf
+21,gujarati_independent_vowels,NotoSansGujarati-Regular.ttf
+22,hebrew,Arial.ttf
+23,hiragana,Arial Unicode.ttf
+24,katakana,Arial Unicode.ttf
+25,khmer_consonants,NotoSansKhmer-Regular.ttf
+26,khmer_digits,NotoSansKhmer-Regular.ttf
+27,khmer_independent_vowels,NotoSansKhmer-Regular.ttf
+28,lao_consonants,Arial Unicode.ttf
+29,lao_digits,Arial Unicode.ttf
+30,mongolian_basic_letters,NotoSansMongolian-Regular.ttf
+31,mongolian_digits,NotoSansMongolian-Regular.ttf
+32,myanmar_consonants,NotoSansMyanmar-Regular.ttf
+33,myanmar_digits,NotoSansMyanmar-Regular.ttf
+34,myanmar_independent_vowels,NotoSansMyanmar-Regular.ttf
+35,n_ko_digits,NotoSansNKo-Regular.ttf
+36,n_ko_letters,NotoSansNKo-Regular.ttf
+37,oriya_consonants,NotoSansOriya-Regular.ttf
+38,oriya_digits,Arial Unicode.ttf
+39,oriya_independent_vowels,Arial Unicode.ttf
+40,russian,Arial.ttf
+41,sinhala_astrological_digits,NotoSansSinhala-Regular.ttf
+42,sinhala_consonants,NotoSansSinhala-Regular.ttf
+43,sinhala_independent_vowels,NotoSansSinhala-Regular.ttf
+44,tamil_consonants,NotoSansTamil-Regular.ttf
+45,tamil_digits,NotoSansTamil-Regular.ttf
+46,tamil_independent_vowels,Arial Unicode.ttf
+47,telugu_consonants,Gurajada.ttf
+48,telugu_digits,Arial Unicode.ttf
+49,telugu_independent_vowels,Arial Unicode.ttf
+50,thai_consonants,Arial Unicode.ttf
+51,thai_digits,Arial Unicode.ttf
+52,tibetan_consonants,NotoSansTibetan-Regular.ttf
+53,tibetan_digits,Arial Unicode.ttf

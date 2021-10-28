@@ -1,0 +1,14 @@
+NotoSansSinhala-Black.ttf
+NotoSansSinhala-Condensed.ttf
+NotoSansSinhala-CondensedBlack.ttf
+NotoSansSinhala-Regular.ttf
+NotoSansSinhala-SemiCondensed.ttf
+NotoSansSinhala-SemiCondensedBlack.ttf
+NotoSansSinhalaUI-Black.ttf
+NotoSansSinhalaUI-Condensed.ttf
+NotoSansSinhalaUI-CondensedBlack.ttf
+NotoSansSinhalaUI-Regular.ttf
+NotoSansSinhalaUI-SemiCondensed.ttf
+NotoSansSinhalaUI-SemiCondensedBlack.ttf
+NotoSerifSinhala-Black.ttf
+NotoSerifSinhala-Regular.ttf

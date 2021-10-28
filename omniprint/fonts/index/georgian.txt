@@ -1,0 +1,12 @@
+NotoSansGeorgian-Black.ttf
+NotoSansGeorgian-Condensed.ttf
+NotoSansGeorgian-CondensedBlack.ttf
+NotoSansGeorgian-Regular.ttf
+NotoSansGeorgian-SemiCondensed.ttf
+NotoSansGeorgian-SemiCondensedBlack.ttf
+NotoSerifGeorgian-Black.ttf
+NotoSerifGeorgian-Condensed.ttf
+NotoSerifGeorgian-CondensedBlack.ttf
+NotoSerifGeorgian-Regular.ttf
+NotoSerifGeorgian-SemiCondensed.ttf
+NotoSerifGeorgian-SemiCondensedBlack.ttf

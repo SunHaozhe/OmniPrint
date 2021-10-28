@@ -1,0 +1,3 @@
+NotoSansGujarati-Regular.ttf
+NotoSansGujaratiUI-Regular.ttf
+NotoSerifGujarati-Regular.ttf

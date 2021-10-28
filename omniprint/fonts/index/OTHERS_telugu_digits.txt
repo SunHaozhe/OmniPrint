@@ -1,0 +1,3 @@
+NotoSansTelugu-Regular.ttf
+NotoSansTeluguUI-Regular.ttf
+NotoSerifTelugu-Regular.ttf

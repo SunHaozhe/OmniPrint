@@ -1,0 +1,29 @@
+This package is part of the noto project.  Visit
+google.com/get/noto for more information.
+
+Built on 2017-10-24 from the following noto repositories:
+-----
+Repo: noto-fonts
+Tag: v2017-10-24-phase3-second-cleanup
+Date: 2017-10-24 12:10:34 GMT
+Commit: 8ef14e6c606a7a0ef3943b9ca01fd49445620d79
+
+Remove some files that aren't for release.
+-----
+Repo: noto-cjk
+Tag: v2017-06-01-serif-cjk-1-1
+Date: 2017-09-20 09:49:40 GMT
+Commit: 32a5844539f2e348ed36b44e990f9b06d7fb89fe
+
+Update serif CJK to 1.1.
+=====
+
+Patched on 2018-04-24 from the following noto repository:
+NotoColorEmoji.ttf
+-----
+Repo: noto-emoji
+Tag: v2018-04-24-pistol-update
+Date: 2018-04-24 14:49:30 GMT
+Commit: 0447355ade750dd92d759b97fcbfaa546394556b
+
+Change image of pistol emoji.

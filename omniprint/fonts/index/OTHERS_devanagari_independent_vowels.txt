@@ -1,0 +1,12 @@
+NotoSansDevanagari-Black.ttf
+NotoSansDevanagari-Condensed.ttf
+NotoSansDevanagari-CondensedBlack.ttf
+NotoSansDevanagari-SemiCondensed.ttf
+NotoSansDevanagari-SemiCondensedBlack.ttf
+NotoSansDevanagariUI-Black.ttf
+NotoSansDevanagariUI-Condensed.ttf
+NotoSansDevanagariUI-CondensedBlack.ttf
+NotoSansDevanagariUI-Regular.ttf
+NotoSansDevanagariUI-SemiCondensed.ttf
+NotoSansDevanagariUI-SemiCondensedBlack.ttf
+NotoSerifDevanagari-Regular.ttf
