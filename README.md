@@ -1,5 +1,6 @@
 # OmniPrint 
 
+[Paper](https://openreview.net/pdf?id=R07XwJPmgpl) | [Appendix](https://openreview.net/attachment?id=R07XwJPmgpl&name=supplementary_material) | [Datasets](https://github.com/SunHaozhe/OmniPrint-datasets) | [Experiments](https://github.com/SunHaozhe/OmniPrint-NeurIPS-paper-experiments)
 
 ![random_rgb_characters.png](images/random_rgb_characters.png)
 
@@ -39,7 +40,6 @@ For more details, please refer to [user manual.md](user_manual.md).
 
 ## Citation
 
-[Paper](https://openreview.net/pdf?id=R07XwJPmgpl) | [Appendix](https://openreview.net/attachment?id=R07XwJPmgpl&name=supplementary_material)
 
 ```
 @inproceedings{sun2021omniprint,
